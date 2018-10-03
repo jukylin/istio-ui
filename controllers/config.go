@@ -78,9 +78,21 @@ func (c *ConfigController) Inject() {
 		c.ServeJSON()
 	}
 
-	data := pkg.GetInjectData(item.(*v1.Pod))
+	data, err := pkg.GetInjectData(item.(*v1.Pod))
+	if err != nil{
+		c.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data" : nil}
+		c.ServeJSON()
+	}
 
-	c.Data["json"] = map[string]interface{}{"code": 0, "msg": "success", "data" : data}
+	err = pkg.PatchData(namespace, name, data)
+	if err != nil{
+		c.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data" : nil}
+		c.ServeJSON()
+	}
+
+
+
+	c.Data["json"] = map[string]interface{}{"code": 0, "msg": "success", "data" : nil}
 	c.ServeJSON()
 }
 

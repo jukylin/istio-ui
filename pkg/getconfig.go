@@ -10,31 +10,40 @@ import (
 	"github.com/ghodss/yaml"
 	"istio.io/istio/pkg/log"
 	"k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
-func GetInjectData(pod *v1.Pod) []byte {
-	meshConfig, _ := GetMeshConfigFromConfigMap()
-	injectConfig, _ := GetInjectConfigFromConfigMap()
-fmt.Printf("%+v \n", meshConfig.DefaultConfig)
-	//spec, status, err := injectionData(wh.sidecarConfig.Template, wh.sidecarTemplateVersion,
-	// &pod.ObjectMeta, &pod.Spec, &pod.ObjectMeta, wh.meshConfig.DefaultConfig, wh.meshConfig) // nolint: lll
-	spec, status, _ := injectionData(injectConfig, sidecarTemplateVersionHash(injectConfig), &pod.ObjectMeta,
-		&pod.Spec,
-			&pod.ObjectMeta,
-				meshConfig.DefaultConfig,
-					meshConfig)
+func GetInjectData(pod *v1.Pod) ([]byte, error) {
+	meshConfig, err := GetMeshConfigFromConfigMap()
+	if err != nil {
+		return nil, err
+	}
+	injectConfig, err := GetInjectConfigFromConfigMap()
+	if err != nil {
+		return nil, err
+	}
+	defaultConfig := DefaultProxyConfig()
+
+	spec, status, err := injectionData(injectConfig, sidecarTemplateVersionHash(injectConfig), &pod.ObjectMeta,
+		&pod.Spec, &pod.ObjectMeta, &defaultConfig, meshConfig)
+	if err != nil {
+		return nil, err
+	}
 
 	annotations := map[string]string{annotationStatus.name: status}
+	patchBytes, err := createPatch(pod, injectionStatus(pod), annotations, spec)
+	if err != nil {
+		return nil, err
+	}
 
-	patchBytes, _ := createPatch(pod, injectionStatus(pod), annotations, spec)
-
-	return patchBytes
+	return patchBytes, nil
 }
 
 func GetMeshConfigFromConfigMap() (*meshconfig.MeshConfig, error) {
 	client := GetKubeClent()
 
 	config, err := client.CoreV1().ConfigMaps(kube.IstioNamespace).Get("istio", metav1.GetOptions{})
+
 	if err != nil {
 		return nil, fmt.Errorf("could not read valid configmap %q from namespace  %q: %v - "+
 			"Use --meshConfigFile or re-run kube-inject with `-i <istioSystemNamespace> and ensure valid MeshConfig exists",
@@ -76,4 +85,16 @@ func GetInjectConfigFromConfigMap() (string, error) {
 	}
 	log.Debugf("using inject template from configmap %q", "istio-sidecar-injector")
 	return injectConfig.Template, nil
+}
+
+
+func PatchData(namespace, name string, data []byte) error {
+	client := GetKubeClent()
+	result, err := client.CoreV1().Pods(namespace).Patch(name, types.JSONPatchType, data, "")
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%+v \n", result)
+	return nil
 }
