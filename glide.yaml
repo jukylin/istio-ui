@@ -1,0 +1,51 @@
+package: github.com/jukylin/istio-ui
+import:
+- package: github.com/astaxie/beego
+- package: github.com/ghodss/yaml
+- package: github.com/gogo/protobuf
+  subpackages:
+  - types
+- package: github.com/hashicorp/go-multierror
+- package: github.com/howeyc/fsnotify
+- package: github.com/json-iterator/go
+- package: istio.io/api
+  subpackages:
+  - mesh/v1alpha1
+- package: istio.io/istio
+  subpackages:
+  - pilot/pkg/kube/inject
+  - pilot/pkg/model
+  - pilot/pkg/serviceregistry/kube
+  - pkg/log
+- package: k8s.io/api
+  subpackages:
+  - admission/v1beta1
+  - admissionregistration/v1beta1
+  - apps/v1
+  - apps/v1beta1
+  - batch/v1
+  - batch/v2alpha1
+  - core/v1
+  - extensions/v1beta1
+- package: k8s.io/apimachinery
+  subpackages:
+  - pkg/apis/meta/v1
+  - pkg/labels
+  - pkg/runtime
+  - pkg/runtime/schema
+  - pkg/runtime/serializer
+  - pkg/types
+  - pkg/util/yaml
+- package: k8s.io/client-go
+  subpackages:
+  - informers
+  - kubernetes
+  - tools/cache
+  - tools/clientcmd
+- package: k8s.io/kubernetes
+  subpackages:
+  - pkg/kubectl/cmd/util
+testImport:
+- package: github.com/smartystreets/goconvey
+  subpackages:
+  - convey

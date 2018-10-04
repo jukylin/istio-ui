@@ -28,8 +28,8 @@ func Run(stop <-chan struct{})  {
 	go controller.Run(stop)
 }
 
-func PodsList() []interface{} {
-	return controller.GetPodsList()
+func DeploysList() []interface{} {
+	return controller.GetDeployList()
 }
 
 

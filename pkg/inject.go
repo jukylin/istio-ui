@@ -15,12 +15,10 @@
 package pkg
 
 import (
-	"bufio"
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"io"
 	"net"
 	"os"
 	"reflect"
@@ -36,7 +34,6 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	yamlDecoder "k8s.io/apimachinery/pkg/util/yaml"
 
 	"github.com/hashicorp/go-multierror"
 
@@ -533,43 +530,27 @@ func injectionData(sidecarTemplate, version string, deploymentMetadata *metav1.O
 
 // IntoResourceFile injects the istio proxy into the specified
 // kubernetes YAML file.
-func IntoResourceFile(sidecarTemplate string, meshconfig *meshconfig.MeshConfig, in io.Reader, out io.Writer) error {
-	reader := yamlDecoder.NewYAMLReader(bufio.NewReaderSize(in, 4096))
-	for {
-		raw, err := reader.Read()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-
-		obj, err := fromRawToObject(raw)
-		if err != nil && !runtime.IsNotRegisteredError(err) {
-			return err
-		}
-
-		var updated []byte
-		if err == nil {
-			outObject, err := intoObject(sidecarTemplate, meshconfig, obj) // nolint: vetshadow
-			if err != nil {
-				return err
-			}
-			if updated, err = yaml.Marshal(outObject); err != nil {
-				return err
-			}
-		} else {
-			updated = raw // unchanged
-		}
-
-		if _, err = out.Write(updated); err != nil {
-			return err
-		}
-		if _, err = fmt.Fprint(out, "---\n"); err != nil {
-			return err
-		}
+func IntoResource(sidecarTemplate string, meshconfig *meshconfig.MeshConfig, raw []byte) ([]byte, error) {
+	obj, err := fromRawToObject(raw)
+	if err != nil && !runtime.IsNotRegisteredError(err) {
+		return nil, err
 	}
-	return nil
+
+	var updated []byte
+	if err == nil {
+		outObject, err := intoObject(sidecarTemplate, meshconfig, obj) // nolint: vetshadow
+		if err != nil {
+			return nil, err
+		}
+		if updated, err = yaml.Marshal(outObject); err != nil {
+			return nil, err
+		}
+	} else {
+		updated = raw // unchanged
+	}
+
+
+	return updated, nil
 }
 
 func fromRawToObject(raw []byte) (runtime.Object, error) {

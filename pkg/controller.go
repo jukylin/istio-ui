@@ -50,6 +50,7 @@ type Controller struct {
 	services  cacheHandler
 	endpoints cacheHandler
 	nodes     cacheHandler
+	deploy     cacheHandler
 
 	pods *PodCache
 
@@ -65,7 +66,7 @@ type cacheHandler struct {
 
 // NewController creates a new Kubernetes controller
 func NewController(client kubernetes.Interface, options ControllerOptions) *Controller {
-	log.Infof("Service controller watching namespace %q for service, endpoint, nodes and pods, refresh %s",
+	log.Infof("Service controller watching namespace %q for Deployments, refresh %s",
 		options.WatchedNamespace, options.ResyncPeriod)
 
 	// Queue requires a time duration for a retry delay after a handler error
@@ -75,10 +76,11 @@ func NewController(client kubernetes.Interface, options ControllerOptions) *Cont
 		queue:        NewQueue(1 * time.Second),
 	}
 
-	sharedInformers := informers.NewFilteredSharedInformerFactory(client, options.ResyncPeriod, options.WatchedNamespace, nil)
+	sharedInformers := informers.NewSharedInformerFactoryWithOptions(client, options.ResyncPeriod,
+		informers.WithNamespace(options.WatchedNamespace))
+	deployInformer := sharedInformers.Apps().V1().Deployments().Informer()
 
-	podInformer := sharedInformers.Core().V1().Pods().Informer()
-	out.pods = newPodCache(out.createCacheHandler(podInformer, "Pod"))
+	out.deploy = out.createCacheHandler(deployInformer, "Deployments")
 
 	return out
 }
@@ -122,7 +124,7 @@ func (c *Controller) createCacheHandler(informer cache.SharedIndexInformer, otyp
 
 // HasSynced returns true after the initial state synchronization
 func (c *Controller) HasSynced() bool {
-	if !c.pods.informer.HasSynced() {
+	if !c.deploy.informer.HasSynced() {
 		return false
 	}
 	return true
@@ -130,25 +132,27 @@ func (c *Controller) HasSynced() bool {
 
 // Run all controllers until a signal is received
 func (c *Controller) Run(stop <-chan struct{}) {
-	go c.pods.informer.Run(stop)
+	go c.deploy.informer.Run(stop)
 
 	<-stop
 	log.Infof("Controller terminated")
 }
 
-func (c *Controller) GetPodsList() []interface{} {
-	list := c.pods.informer.GetStore().List()
+func (c *Controller) GetDeployList() []interface{} {
+	list := c.deploy.informer.GetIndexer().List()
 	return list
 }
 
 func (c *Controller) ListKeys() []string {
-	list := c.pods.informer.GetStore().ListKeys()
+	list := c.deploy.informer.GetStore().ListKeys()
 	return list
 }
 
 func (c *Controller) GetByKey(key string) (item interface{}, exists bool, err error) {
-	return c.pods.informer.GetStore().GetByKey(key)
+	return c.deploy.informer.GetStore().GetByKey(key)
 }
+
+
 
 //// WorkloadHealthCheckInfo implements a service catalog operation
 //func (c *Controller) WorkloadHealthCheckInfo(addr string) model.ProbeList {

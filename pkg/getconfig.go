@@ -9,36 +9,61 @@ import (
 	"istio.io/istio/pilot/pkg/serviceregistry/kube"
 	"github.com/ghodss/yaml"
 	"istio.io/istio/pkg/log"
-	"k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
+	extvb1 "k8s.io/api/extensions/v1beta1"
+	appsv1 "k8s.io/api/apps/v1"
+	appsvb1 "k8s.io/api/apps/v1beta1"
+	appsvb2 "k8s.io/api/apps/v1beta2"
+
+
+
 )
 
-func GetInjectData(pod *v1.Pod) ([]byte, error) {
+/**
+注入信息并把数据更新到k8s
+ */
+func InjectData(raw []byte, namespace string) error {
 	meshConfig, err := GetMeshConfigFromConfigMap()
 	if err != nil {
-		return nil, err
+		return err
 	}
+
 	injectConfig, err := GetInjectConfigFromConfigMap()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	defaultConfig := DefaultProxyConfig()
 
-	spec, status, err := injectionData(injectConfig, sidecarTemplateVersionHash(injectConfig), &pod.ObjectMeta,
-		&pod.Spec, &pod.ObjectMeta, &defaultConfig, meshConfig)
+	resource, err := IntoResource(injectConfig, meshConfig, raw)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	annotations := map[string]string{annotationStatus.name: status}
-	patchBytes, err := createPatch(pod, injectionStatus(pod), annotations, spec)
-	if err != nil {
-		return nil, err
+	obj, err := fromRawToObject(raw)
+	group := obj.GetObjectKind().GroupVersionKind().GroupKind().Group
+
+	if obj.GetObjectKind().GroupVersionKind().Version == "v1beta1" && group == "extensions"{
+		var deploy *extvb1.Deployment
+		yaml.Unmarshal(resource, &deploy);
+		_, err = GetKubeClent().ExtensionsV1beta1().Deployments(namespace).Update(deploy)
+	}else if obj.GetObjectKind().GroupVersionKind().Version == "v1" && group == "apps"{
+		var deploy *appsv1.Deployment
+		yaml.Unmarshal(resource, &deploy);
+		_, err = GetKubeClent().AppsV1().Deployments(namespace).Update(deploy)
+	}else if obj.GetObjectKind().GroupVersionKind().Version == "v1beta1" && group == "apps"{
+		var deploy *appsvb1.Deployment
+		yaml.Unmarshal(resource, &deploy);
+		_, err = GetKubeClent().AppsV1beta1().Deployments(namespace).Update(deploy)
+	}else if obj.GetObjectKind().GroupVersionKind().Version == "v1beta2" && group == "apps"{
+		var deploy *appsvb2.Deployment
+		yaml.Unmarshal(resource, &deploy);
+		_, err = GetKubeClent().AppsV1beta2().Deployments(namespace).Update(deploy)
 	}
 
-	return patchBytes, nil
+	return err
 }
 
+/**
+从k8s获取mesh配置信息
+ */
 func GetMeshConfigFromConfigMap() (*meshconfig.MeshConfig, error) {
 	client := GetKubeClent()
 
@@ -60,7 +85,9 @@ func GetMeshConfigFromConfigMap() (*meshconfig.MeshConfig, error) {
 	return ApplyMeshConfigDefaults(configYaml)
 }
 
-
+/**
+从k8s获取配置信息
+ */
 func GetInjectConfigFromConfigMap() (string, error) {
 	client := GetKubeClent()
 
@@ -85,16 +112,4 @@ func GetInjectConfigFromConfigMap() (string, error) {
 	}
 	log.Debugf("using inject template from configmap %q", "istio-sidecar-injector")
 	return injectConfig.Template, nil
-}
-
-
-func PatchData(namespace, name string, data []byte) error {
-	client := GetKubeClent()
-	result, err := client.CoreV1().Pods(namespace).Patch(name, types.JSONPatchType, data, "")
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("%+v \n", result)
-	return nil
 }
