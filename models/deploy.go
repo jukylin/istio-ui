@@ -10,7 +10,7 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 var controller *pkg.Controller
 
-func InitPods() {
+func InitDeploy() {
 
 	options := pkg.ControllerOptions{
 		DomainSuffix : "cluster.local",

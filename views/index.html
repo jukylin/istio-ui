@@ -24,7 +24,7 @@
             <el-menu :default-openeds="['1', '3']">
                 <el-submenu index="1">
                     <template slot="title"><i class="el-icon-message"></i>k8s</template>
-                        <el-menu-item index="1-1">pods</el-menu-item>
+                        <el-menu-item index="1-1">Deployment</el-menu-item>
                 </el-submenu>
                 <el-submenu index="2">
                     <template slot="title"><i class="el-icon-menu"></i>istio</template>
@@ -56,9 +56,11 @@
                     </el-table-column>
                     <el-table-column prop="namespace" label="空间">
                     </el-table-column>
-                    <el-table-column prop="status" label="状态">
+                    <el-table-column prop="version" label="版本">
                     </el-table-column>
                     <el-table-column prop="is_inject"  :formatter="getIsInject" label="已注入">
+                    </el-table-column>
+                    <el-table-column prop="create_time" label="创建时间">
                     </el-table-column>
                     <el-table-column label="操作" width="260px">
                         <template scope="scope">
@@ -120,6 +122,20 @@
             },
             handleInject: function (row) {
                 console.log(row)
+                this.$http.post('/config/inject?name='+ row.name + '&namespace='+row.namespace).then(function (resp) {
+                    if (resp.body.code === 0) {
+                        this.$message({
+                            message: '注入成功',
+                            type: 'success'
+                        });
+                        this.getList();
+                    }else{
+                        this.$message({
+                            message: resp.body.msg,
+                            type: 'error'
+                        });
+                    }
+                });
             },
             getList: function () {
                 var _self = this;

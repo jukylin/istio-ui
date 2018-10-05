@@ -1,17 +1,12 @@
 package controllers
 
 import (
-	//"encoding/json"
 	"github.com/json-iterator/go"
-	//"k8s.io/api/core/v1"
 	"github.com/astaxie/beego"
 	"github.com/jukylin/istio-ui/models"
 	"github.com/jukylin/istio-ui/pkg"
-	//"github.com/judwhite/go-svc/svc"
 	appv1 "k8s.io/api/apps/v1"
-	//"github.com/ghodss/yaml"
-	//cmdutil "k8s.io/kubernetes/pkg/kubectl/cmd/util"
-	//"fmt"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	yaml2 "github.com/ghodss/yaml"
 )
 
@@ -26,7 +21,8 @@ type ConfigController struct {
 type listReturnItem struct{
 	Name string `json:"name"`
 	Namespace string `json:"namespace"`
-	Labels string `json:"labels"`
+	Version string `json:"version"`
+	Create_time metav1.Time `json:"create_time"`
 	IsInject string `json:"is_inject"`
 }
 
@@ -34,15 +30,17 @@ type listReturnItem struct{
 func (c *ConfigController) List() {
 	deploysList := models.DeploysList()
 	var list []listReturnItem
-	var labels,isInject string
+	var version,isInject string
 
 	for _, deployItem := range deploysList{
 		deploy := deployItem.(*appv1.Deployment)
 
 		if _, ok := deploy.Labels["version"]; ok {
-			labels = deploy.Labels["version"]
+			version = deploy.Labels["version"]
+		} else if _, ok := deploy.Spec.Template.Labels["version"]; ok{
+			version = deploy.Spec.Template.Labels["version"]
 		} else {
-			labels = ""
+			version = ""
 		}
 
 		if _, ok := deploy.Spec.Template.Annotations["sidecar.istio.io/status"] ; ok {
@@ -54,7 +52,8 @@ func (c *ConfigController) List() {
 		lRI := listReturnItem{
 			deploy.Name,
 			deploy.Namespace,
-			labels,
+			version,
+			deploy.CreationTimestamp,
 			isInject,
 		}
 
@@ -78,16 +77,26 @@ func (c *ConfigController) Inject() {
 	}
 
 	if exists != true{
-		c.Data["json"] = map[string]interface{}{"code": -1, "msg": "不存在", "data" : nil}
+		c.Data["json"] = map[string]interface{}{"code": -1, "msg": "not exists", "data" : nil}
 		c.ServeJSON()
 	}
 
 	deploy := item.(*appv1.Deployment)
 
-	Anno := deploy.GetObjectMeta().GetAnnotations()
-	lastConfig := Anno["kubectl.kubernetes.io/last-applied-configuration"]
+	if _, ok := deploy.Spec.Template.Annotations["sidecar.istio.io/status"] ; ok {
+		c.Data["json"] = map[string]interface{}{"code": -1, "msg": "has injected", "data" : nil}
+		c.ServeJSON()
+	}
 
+	Anno := deploy.GetObjectMeta().GetAnnotations()
+	if _, ok := Anno[pkg.LastAppliedConfigAnnotation]; !ok{
+		c.Data["json"] = map[string]interface{}{"code": -1, "msg": "lost last configuration", "data" : nil}
+		c.ServeJSON()
+	}
+
+	lastConfig := Anno[pkg.LastAppliedConfigAnnotation]
 	yd, err := yaml2.JSONToYAML([]byte(lastConfig))
+
 	err = pkg.InjectData(yd, namespace)
 	if err != nil{
 		c.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data" : nil}

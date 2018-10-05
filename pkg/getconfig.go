@@ -13,9 +13,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	appsvb1 "k8s.io/api/apps/v1beta1"
 	appsvb2 "k8s.io/api/apps/v1beta2"
-
-
-
 )
 
 /**
@@ -36,29 +33,49 @@ func InjectData(raw []byte, namespace string) error {
 	if err != nil {
 		return err
 	}
-
 	obj, err := fromRawToObject(raw)
 	group := obj.GetObjectKind().GroupVersionKind().GroupKind().Group
+
+	ann, err := applyLastConfig(resource)
+	if err != nil {
+		return err
+	}
 
 	if obj.GetObjectKind().GroupVersionKind().Version == "v1beta1" && group == "extensions"{
 		var deploy *extvb1.Deployment
 		yaml.Unmarshal(resource, &deploy);
+		deploy.GetObjectMeta().SetAnnotations(ann)
 		_, err = GetKubeClent().ExtensionsV1beta1().Deployments(namespace).Update(deploy)
 	}else if obj.GetObjectKind().GroupVersionKind().Version == "v1" && group == "apps"{
 		var deploy *appsv1.Deployment
-		yaml.Unmarshal(resource, &deploy);
+		yaml.Unmarshal(resource, &deploy)
+		deploy.GetObjectMeta().SetAnnotations(ann)
 		_, err = GetKubeClent().AppsV1().Deployments(namespace).Update(deploy)
 	}else if obj.GetObjectKind().GroupVersionKind().Version == "v1beta1" && group == "apps"{
 		var deploy *appsvb1.Deployment
-		yaml.Unmarshal(resource, &deploy);
+		yaml.Unmarshal(resource, &deploy)
+		deploy.GetObjectMeta().SetAnnotations(ann)
 		_, err = GetKubeClent().AppsV1beta1().Deployments(namespace).Update(deploy)
 	}else if obj.GetObjectKind().GroupVersionKind().Version == "v1beta2" && group == "apps"{
 		var deploy *appsvb2.Deployment
-		yaml.Unmarshal(resource, &deploy);
+		yaml.Unmarshal(resource, &deploy)
+		deploy.GetObjectMeta().SetAnnotations(ann)
 		_, err = GetKubeClent().AppsV1beta2().Deployments(namespace).Update(deploy)
 	}
 
 	return err
+}
+
+func applyLastConfig(resource []byte) (map[string]string, error)  {
+	ann := make(map[string]string)
+	json, err := yaml.YAMLToJSON(resource)
+
+	if err != nil {
+		return nil, err
+	}
+	ann[LastAppliedConfigAnnotation] = string(json)
+
+	return ann, nil
 }
 
 /**
