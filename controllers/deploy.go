@@ -13,7 +13,7 @@ import (
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 
-type ConfigController struct {
+type DeployController struct {
 	beego.Controller
 }
 
@@ -27,7 +27,7 @@ type listReturnItem struct{
 }
 
 
-func (c *ConfigController) List() {
+func (c *DeployController) List() {
 	deploysList := models.DeploysList()
 	var list []listReturnItem
 	var version,isInject string
@@ -66,7 +66,7 @@ func (c *ConfigController) List() {
 
 
 
-func (c *ConfigController) Inject() {
+func (c *DeployController) Inject() {
 	name := c.Input().Get("name")
 	namespace := c.Input().Get("namespace")
 

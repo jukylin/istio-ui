@@ -15,5 +15,6 @@ import (
 
 func init() {
 	beego.SetStaticPath("/static","views")
-	beego.AutoRouter(&controllers.ConfigController{})
+	beego.AutoRouter(&controllers.DeployController{})
+	beego.AutoRouter(&controllers.Istio_ConfigController{})
 }

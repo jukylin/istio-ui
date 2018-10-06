@@ -2,6 +2,9 @@ package pkg
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	//"istio.io/istio/pilot/pkg/kube/inject"
 	meshconfig "istio.io/api/mesh/v1alpha1"
@@ -13,6 +16,8 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	appsvb1 "k8s.io/api/apps/v1beta1"
 	appsvb2 "k8s.io/api/apps/v1beta2"
+	"github.com/astaxie/beego"
+	istiomodel "istio.io/istio/pilot/pkg/model"
 )
 
 /**
@@ -129,4 +134,72 @@ func GetInjectConfigFromConfigMap() (string, error) {
 	}
 	log.Debugf("using inject template from configmap %q", "istio-sidecar-injector")
 	return injectConfig.Template, nil
+}
+
+func CheckIsExists(fileOrDir string) (bool, error) {
+	_, err := os.Stat(fileOrDir)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+
+func WriteIstioConfig(data []byte, namespace, filename string) error {
+	istioConfigDir := beego.AppConfig.String("istio_config_dir")
+	exists, err := CheckIsExists(istioConfigDir)
+	if err != nil{
+		return err
+	}
+
+	if !exists {
+		errors.New("istio_config_dir not exists")
+	}
+
+	if namespace != "" {
+		istioConfigDir = istioConfigDir + "/" + namespace
+		exists, err = CheckIsExists(istioConfigDir)
+		if err != nil {
+			return err
+		}
+
+		if !exists {
+			err = os.Mkdir(istioConfigDir, os.ModePerm)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	exists, err = CheckIsExists(filename)
+	if err != nil{
+		if err != nil{
+			return err
+		}
+	}
+
+	err = ioutil.WriteFile(istioConfigDir + "/" + filename, []byte(data), 0644)
+	if err != nil{
+		if err != nil{
+			return err
+		}
+	}
+
+	return nil
+}
+
+func PostIstioConfig(configs []istiomodel.Config) error {
+	client := GetConfigClient()
+	for _, config := range configs {
+		rev, err := client.Create(config)
+		if err != nil {
+			return err
+		}
+		beego.Info("Created config %v at revision %v\n", config.Key(), rev)
+	}
+
+	return nil
 }

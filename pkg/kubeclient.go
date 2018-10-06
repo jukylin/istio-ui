@@ -3,9 +3,12 @@ package pkg
 import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	"istio.io/istio/pilot/pkg/config/kube/crd"
+	istiomodel "istio.io/istio/pilot/pkg/model"
 )
 
 var clientset *kubernetes.Clientset
+var configClient *crd.Client
 
 func InitKubeClient()  {
 
@@ -22,6 +25,22 @@ func InitKubeClient()  {
 	}
 }
 
+func InitConfigClient()  {
+	client, err := crd.NewClient("/Users/apple/.kube/config", "",
+		istiomodel.IstioConfigTypes, "")
+	if err != nil {
+		panic(err.Error())
+	}
+	configClient = client
+}
+
 func GetKubeClent() *kubernetes.Clientset {
 	return clientset
 }
+
+
+func GetConfigClient() *crd.Client {
+	return configClient
+}
+
+
