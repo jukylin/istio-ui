@@ -5,6 +5,7 @@ import (
 	"istio.io/istio/pilot/pkg/config/kube/crd"
 	"github.com/jukylin/istio-ui/pkg"
 	istiomodel "istio.io/istio/pilot/pkg/model"
+	"fmt"
 )
 
 
@@ -48,7 +49,6 @@ func (c *Istio_ConfigController) Save() {
 	configStr := c.Input().Get("config")
 
 	var configs []istiomodel.Config
-
 	configs, _, err := crd.ParseInputs(configStr)
 
 	if err != nil{
