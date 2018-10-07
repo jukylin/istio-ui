@@ -21,7 +21,7 @@ import (
 )
 
 /**
-注入信息并把数据更新到k8s
+Inject the injectConfig and meshConfi to rwa，then post to k8s
  */
 func InjectData(raw []byte, namespace string) error {
 	meshConfig, err := GetMeshConfigFromConfigMap()
@@ -71,6 +71,7 @@ func InjectData(raw []byte, namespace string) error {
 	return err
 }
 
+
 func applyLastConfig(resource []byte) (map[string]string, error)  {
 	ann := make(map[string]string)
 	json, err := yaml.YAMLToJSON(resource)
@@ -84,7 +85,7 @@ func applyLastConfig(resource []byte) (map[string]string, error)  {
 }
 
 /**
-从k8s获取mesh配置信息
+get mesh config from k8s
  */
 func GetMeshConfigFromConfigMap() (*meshconfig.MeshConfig, error) {
 	client := GetKubeClent()
@@ -108,7 +109,7 @@ func GetMeshConfigFromConfigMap() (*meshconfig.MeshConfig, error) {
 }
 
 /**
-从k8s获取配置信息
+get inject config from k8s
  */
 func GetInjectConfigFromConfigMap() (string, error) {
 	client := GetKubeClent()
@@ -147,59 +148,155 @@ func CheckIsExists(fileOrDir string) (bool, error) {
 	return false, err
 }
 
+func CheckIstioConfigIsExists(filename, namespace  string) (bool, error) {
+	istioConfigDir, err := getIstioConfigDir(namespace)
+	if err != nil{
+		return false, err
+	}
+	return CheckIsExists(istioConfigDir + "/" + filename)
+}
 
-func WriteIstioConfig(data []byte, namespace, filename string) error {
+func getIstioConfigDir(namespace string) (string, error) {
 	istioConfigDir := beego.AppConfig.String("istio_config_dir")
 	exists, err := CheckIsExists(istioConfigDir)
 	if err != nil{
-		return err
+		return "", err
 	}
 
 	if !exists {
-		errors.New("istio_config_dir not exists")
+		return "", errors.New("istio_config_dir not exists")
 	}
 
 	if namespace != "" {
 		istioConfigDir = istioConfigDir + "/" + namespace
 		exists, err = CheckIsExists(istioConfigDir)
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		if !exists {
 			err = os.Mkdir(istioConfigDir, os.ModePerm)
 			if err != nil {
-				return err
+				return "", err
 			}
 		}
 	}
 
-	exists, err = CheckIsExists(filename)
+	return istioConfigDir, nil
+}
+
+/**
+write to local file
+ */
+func WriteIstioConfig(data []byte, filename, namespace  string) error {
+	istioConfigDir, err := getIstioConfigDir(namespace)
 	if err != nil{
-		if err != nil{
-			return err
-		}
+		return err
 	}
 
 	err = ioutil.WriteFile(istioConfigDir + "/" + filename, []byte(data), 0644)
 	if err != nil{
-		if err != nil{
-			return err
+		return err
+	}
+
+	return nil
+}
+
+
+func DelLocalIstioConfig(filename, namespace  string) error {
+	istioConfigDir, err := getIstioConfigDir(namespace)
+	if err != nil{
+		return err
+	}
+
+	err = os.Remove(istioConfigDir + "/" + filename)
+	if err != nil{
+		return err
+	}
+
+	return nil
+}
+
+
+/**
+post to k8s
+ */
+func DelRemoteIstioConfig(configs []istiomodel.Config, namespace string) error {
+
+	client := GetConfigClient()
+
+	for _, config := range configs {
+		config.Namespace = handleNamespaces(config.Namespace, namespace)
+		exists := client.Get(config.ConfigMeta.Type, config.Name, config.Namespace)
+
+		if  exists == nil {
+			beego.Warn(config.ConfigMeta.Type + "'s " + config.Name + "not exists")
+		}else{
+			config.ResourceVersion = exists.ResourceVersion
+			err := client.Delete(config.ConfigMeta.Type, config.Name, config.Namespace)
+			if err != nil {
+				return err
+			}
+			beego.Info("Delete config "+ config.ConfigMeta.Type +"'s " + config.Name)
 		}
 	}
 
 	return nil
 }
 
-func PostIstioConfig(configs []istiomodel.Config) error {
+
+/**
+get istio config from local file
+ */
+func GetIstioConfig(filename, namespace string)([]byte, error){
+	istioConfigDir, err := getIstioConfigDir(namespace)
+	if err != nil{
+		return nil, err
+	}
+
+	data, err := ioutil.ReadFile(istioConfigDir + "/" + filename, )
+	if err != nil{
+		return nil, err
+	}
+
+	return data, nil
+}
+
+/**
+post istio config to k8s
+If there is an update, otherwise create
+ */
+func PostIstioConfig(configs []istiomodel.Config, namespace string) error {
 	client := GetConfigClient()
+
 	for _, config := range configs {
-		rev, err := client.Create(config)
-		if err != nil {
-			return err
+		config.Namespace = handleNamespaces(config.Namespace, namespace)
+		exists := client.Get(config.ConfigMeta.Type, config.Name, config.Namespace)
+
+		if  exists == nil {
+			rev, err := client.Create(config)
+			if err != nil {
+				return err
+			}
+			beego.Info("Create config "+ config.Key() +" at revision "+ rev +"\n")
+		}else{
+			config.ResourceVersion = exists.ResourceVersion
+			rev, err := client.Update(config)
+			if err != nil {
+				return err
+			}
+			beego.Info("Update config "+ config.Key() +" at revision "+ rev +"\n")
 		}
-		beego.Info("Created config %v at revision %v\n", config.Key(), rev)
 	}
 
 	return nil
+}
+
+
+func handleNamespaces(objectNamespace , namespace string) string {
+	if objectNamespace != "" {
+		return objectNamespace
+	}
+
+	return namespace
 }
