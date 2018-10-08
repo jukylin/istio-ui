@@ -35,25 +35,55 @@
         </el-aside>
 
         <el-main>
-            <el-table :data="tableData">
-                <el-table-column prop="name" label="名称">
-                </el-table-column>
-                <el-table-column prop="namespace" label="空间">
-                </el-table-column>
-                <el-table-column prop="version" label="版本">
-                </el-table-column>
-                <el-table-column prop="is_inject"  :formatter="getIsInject" label="已注入">
-                </el-table-column>
-                <el-table-column prop="create_time" label="创建时间">
-                </el-table-column>
-                <el-table-column label="操作" width="260px">
-                    <template scope="scope">
-                        <el-button v-if="scope.row.is_inject == 0" size="small" @click="handleInject(scope.row)">注入</el-button>
-                        <el-button size="small" @click="getIstioConfig(scope.row)">istio配置</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
+
+            <el-row>
+                <el-col :span="3">
+                    <el-select v-model="search_namespace" placeholder="请选择">
+                        <el-option
+                                v-for="item in namespace_options"
+                                :key="item"
+                                :label="item"
+                                :value="item">
+                        </el-option>
+                    </el-select>
+                </el-col>&nbsp;
+
+                <el-col :span="3">
+                    <el-button type="primary" @click="search">搜索</el-button>
+                </el-col>
+
+            </el-row>
+
+            <el-row>
+                <el-table :data="tableData">
+                    <el-table-column prop="name" label="名称">
+                    </el-table-column>
+                    <el-table-column prop="namespace" label="空间">
+                    </el-table-column>
+                    <el-table-column prop="version" label="版本">
+                    </el-table-column>
+                    <el-table-column prop="is_inject"  :formatter="getIsInject" label="已注入">
+                    </el-table-column>
+                    <el-table-column prop="create_time" label="创建时间">
+                    </el-table-column>
+                    <el-table-column label="操作" width="260px">
+                        <template scope="scope">
+                            <el-button v-if="scope.row.is_inject == 0" size="small" @click="handleInject(scope.row)">注入</el-button>
+                            <el-button size="small" @click="getIstioConfig(scope.row)">istio配置</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </el-row>
+            <el-row>
+                <el-col :span="24">
+                    <div style="float: right;">
+                        <el-pagination :current-page.sync="pagination.currentPage" :page-size="pagination.pageSize" :total="pagination.total" @current-change="getList" layout="total, prev, pager, next"></el-pagination>
+                    </div>
+                </el-col>
+            </el-row>
+
         </el-main>
+
 
         <el-dialog title="istio配置" :visible.sync="is_show_istio_config" :close-on-click-modal="false"
                    :close-on-press-escape="false">
@@ -118,7 +148,15 @@
             is_show_istio_config: false,
             istio_config: "",
             handle_name: "",
-            handle_namespace: ""
+            handle_namespace: "",
+            //current_namespace: "default",
+            search_namespace: "default",
+            pagination: {
+                currentPage: 1,
+                pageSize: 10,
+                total: 0
+            },
+            namespace_options: [],
         },
         methods: {
             getIsInject: function (row) {
@@ -198,9 +236,10 @@
             },
             getList: function () {
                 var _self = this;
-                this.$http.get('/deploy/list').then(function (resp) {
+                this.$http.get('/deploy/list?' , {params: {page: this.pagination.currentPage, page_size: this.pagination.pageSize, namespace: _self.search_namespace}}).then(function (resp) {
                     if (resp.body.code === 0) {
-                        _self.tableData = resp.body.data;
+                        _self.tableData = resp.body.data.list;
+                        _self.pagination.total = resp.body.data.total;
                     }else{
                         this.$message({
                             message: resp.body.msg,
@@ -208,10 +247,27 @@
                         });
                     }
                 });
+            },
+            getWorkNameSpace: function () {
+                var _self = this;
+                this.$http.get('/deploy/getworknamespaces?').then(function (resp) {
+                    if (resp.body.code === 0) {
+                        _self.namespace_options = resp.body.data;
+                    }else{
+                        this.$message({
+                            message: resp.body.msg,
+                            type: 'error'
+                        });
+                    }
+                });
+            },
+            search:function () {
+                this.getList();
             }
         },
         mounted: function () {
             this.getList();
+            this.getWorkNameSpace();
         }
     })
 </script>

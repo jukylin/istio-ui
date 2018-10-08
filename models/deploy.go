@@ -28,8 +28,8 @@ func Run(stop <-chan struct{})  {
 	go controller.Run(stop)
 }
 
-func DeploysList() []interface{} {
-	return controller.GetDeployList()
+func DeploysList(deployIndexs []string) []interface{} {
+	return controller.GetDeployList(deployIndexs)
 }
 
 

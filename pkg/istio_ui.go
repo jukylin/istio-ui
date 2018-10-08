@@ -18,6 +18,7 @@ import (
 	appsvb2 "k8s.io/api/apps/v1beta2"
 	"github.com/astaxie/beego"
 	istiomodel "istio.io/istio/pilot/pkg/model"
+	"strings"
 )
 
 /**
@@ -299,4 +300,10 @@ func handleNamespaces(objectNamespace , namespace string) string {
 	}
 
 	return namespace
+}
+
+func GetWorkNameSpace() []string {
+	work_namespace := beego.AppConfig.String("work_namespace")
+	nameSpaces := strings.Split(work_namespace, ",")
+	return nameSpaces
 }

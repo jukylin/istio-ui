@@ -5,7 +5,6 @@ import (
 	"istio.io/istio/pilot/pkg/config/kube/crd"
 	"github.com/jukylin/istio-ui/pkg"
 	istiomodel "istio.io/istio/pilot/pkg/model"
-	"fmt"
 )
 
 

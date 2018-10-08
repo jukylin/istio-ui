@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"strconv"
 	"github.com/json-iterator/go"
 	"github.com/astaxie/beego"
 	"github.com/jukylin/istio-ui/models"
@@ -28,7 +29,46 @@ type listReturnItem struct{
 
 
 func (c *DeployController) List() {
-	deploysList := models.DeploysList()
+	namespace := c.Input().Get("namespace")
+	get_page := c.Input().Get("page")
+	get_pagesize := c.Input().Get("page_size")
+
+	if get_page == ""{
+		get_page = "1"
+	}
+
+	if get_pagesize == ""{
+		get_pagesize = "10"
+	}
+
+	if namespace == ""{
+		namespace = "default"
+	}
+
+	page, err := strconv.Atoi(get_page)
+	if err != nil{
+		c.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data" : ""}
+		c.ServeJSON()
+	}
+
+	pagesize, err := strconv.Atoi(get_pagesize)
+	if err != nil{
+		c.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data" : ""}
+		c.ServeJSON()
+	}
+
+	total := pkg.DeployIndexLen(namespace)
+
+	start := (page - 1) * 10
+	end := pagesize
+
+	if total < start + end {
+		end = 0
+	}
+
+	deployIndexs := pkg.GetDeployIndexLimit(start, end, namespace)
+
+	deploysList := models.DeploysList(deployIndexs)
 	var list []listReturnItem
 	var version,isInject string
 
@@ -60,7 +100,9 @@ func (c *DeployController) List() {
 		list = append(list, lRI)
 	}
 
-	c.Data["json"] = map[string]interface{}{"code": 0, "msg": "success", "data" : list}
+
+
+	c.Data["json"] = map[string]interface{}{"code": 0, "msg": "success", "data" : map[string]interface{}{"list":list, "total":total}}
 	c.ServeJSON()
 }
 
@@ -104,6 +146,18 @@ func (c *DeployController) Inject() {
 	}
 
 	c.Data["json"] = map[string]interface{}{"code": 0, "msg": "success", "data" : ""}
+	c.ServeJSON()
+}
+
+func (c *DeployController) GetWorkNameSpaces()  {
+	nameSpaces := pkg.GetWorkNameSpace()
+	c.Data["json"] = map[string]interface{}{"code": 0, "msg": "success", "data" : nameSpaces}
+	c.ServeJSON()
+}
+
+func (c *DeployController) GetDeployIndex()  {
+	deployIndexs := pkg.GetAllDeployIndex("default")
+	c.Data["json"] = map[string]interface{}{"code": 0, "msg": "success", "data" : deployIndexs}
 	c.ServeJSON()
 }
 

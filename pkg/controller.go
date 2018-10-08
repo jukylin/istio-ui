@@ -29,6 +29,8 @@ import (
 
 	"istio.io/istio/pilot/pkg/model"
 	"istio.io/istio/pkg/log"
+	"k8s.io/api/apps/v1"
+	"fmt"
 )
 
 
@@ -107,6 +109,8 @@ func (c *Controller) createCacheHandler(informer cache.SharedIndexInformer, otyp
 		cache.ResourceEventHandlerFuncs{
 			// TODO: filtering functions to skip over un-referenced resources (perf)
 			AddFunc: func(obj interface{}) {
+				deploy := obj.(*v1.Deployment)
+				SetDeployIndex(deploy.Namespace+"/"+deploy.Name, deploy.Namespace)
 				c.queue.Push(Task{handler.Apply, obj, model.EventAdd})
 			},
 			UpdateFunc: func(old, cur interface{}) {
@@ -115,6 +119,8 @@ func (c *Controller) createCacheHandler(informer cache.SharedIndexInformer, otyp
 				}
 			},
 			DeleteFunc: func(obj interface{}) {
+				deploy := obj.(*v1.Deployment)
+				DelDeployIndex(deploy.Namespace+"/"+deploy.Name, deploy.Namespace)
 				c.queue.Push(Task{handler.Apply, obj, model.EventDelete})
 			},
 		})
@@ -138,8 +144,24 @@ func (c *Controller) Run(stop <-chan struct{}) {
 	log.Infof("Controller terminated")
 }
 
-func (c *Controller) GetDeployList() []interface{} {
-	list := c.deploy.informer.GetIndexer().List()
+func (c *Controller) GetDeployList(deployIndexs []string) []interface{} {
+	fmt.Printf("deployIndexs %+v \n", deployIndexs)
+	list := make([]interface{}, len(deployIndexs))
+	for k, index := range deployIndexs {
+		item, exists, err := c.deploy.informer.GetIndexer().GetByKey(index)
+		if err != nil {
+			log.Error(err.Error())
+			continue
+		}
+
+		if !exists {
+			log.Error(index + "not exists")
+			continue
+		}
+		list[k] = item
+	}
+	fmt.Printf("list %+v \n", list)
+
 	return list
 }
 
@@ -151,7 +173,3 @@ func (c *Controller) ListKeys() []string {
 func (c *Controller) GetByKey(key string) (item interface{}, exists bool, err error) {
 	return c.deploy.informer.GetStore().GetByKey(key)
 }
-
-
-
-
