@@ -145,7 +145,13 @@ func (c *DeployController) Inject() {
 	lastConfig := Anno[pkg.LastAppliedConfigAnnotation]
 	yd, err := yaml2.JSONToYAML([]byte(lastConfig))
 
-	err = pkg.InjectData(yd, namespace)
+	deploy, err = pkg.InjectData(yd)
+	if err != nil{
+		c.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data" : nil}
+		c.ServeJSON()
+	}
+
+	err = pkg.UpdateDeploy(deploy, namespace)
 	if err != nil{
 		c.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data" : nil}
 		c.ServeJSON()
