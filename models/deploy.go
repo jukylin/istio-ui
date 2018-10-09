@@ -10,16 +10,13 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 var controller *pkg.Controller
 
-func InitDeploy() {
+func InitController() {
 
 	options := pkg.ControllerOptions{
 		DomainSuffix : "cluster.local",
 		ResyncPeriod : 60*time.Second,
 		WatchedNamespace : "",
 	}
-	//	//namespace := "default"
-	//	//pod := "example-xxxxx"
-	//	//_, err = clientset.CoreV1().Pods(namespace).Get(pod, metav1.GetOptions{})
 
 	controller = pkg.NewController(pkg.GetKubeClent(), options)
 }

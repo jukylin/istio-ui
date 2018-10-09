@@ -16,7 +16,7 @@ func main() {
 	stop := make(chan struct{})
 	pkg.InitKubeClient()
 	pkg.InitConfigClient()
-	models.InitDeploy()
+	models.InitController()
 	models.Run(stop)
 
 	beego.Run()

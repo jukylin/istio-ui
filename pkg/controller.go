@@ -52,6 +52,7 @@ type Controller struct {
 	endpoints cacheHandler
 	nodes     cacheHandler
 	deploy     cacheHandler
+	namespaces     cacheHandler
 
 	pods *PodCache
 
@@ -80,8 +81,10 @@ func NewController(client kubernetes.Interface, options ControllerOptions) *Cont
 	sharedInformers := informers.NewSharedInformerFactoryWithOptions(client, options.ResyncPeriod,
 		informers.WithNamespace(options.WatchedNamespace))
 	deployInformer := sharedInformers.Apps().V1().Deployments().Informer()
+	nameSpacesInformer := sharedInformers.Core().V1().Namespaces().Informer()
 
 	out.deploy = out.createCacheHandler(deployInformer, "Deployments")
+	out.namespaces = out.createCacheHandler(nameSpacesInformer, "namespace")
 
 	return out
 }
@@ -108,8 +111,9 @@ func (c *Controller) createCacheHandler(informer cache.SharedIndexInformer, otyp
 		cache.ResourceEventHandlerFuncs{
 			// TODO: filtering functions to skip over un-referenced resources (perf)
 			AddFunc: func(obj interface{}) {
-				deploy := obj.(*v1.Deployment)
-				SetDeployIndex(deploy.Namespace+"/"+deploy.Name, deploy.Namespace)
+				if deploy, ok := obj.(*v1.Deployment); ok {
+					SetDeployIndex(deploy.Namespace+"/"+deploy.Name, deploy.Namespace)
+				}
 				c.queue.Push(Task{handler.Apply, obj, model.EventAdd})
 			},
 			UpdateFunc: func(old, cur interface{}) {
@@ -118,8 +122,9 @@ func (c *Controller) createCacheHandler(informer cache.SharedIndexInformer, otyp
 				}
 			},
 			DeleteFunc: func(obj interface{}) {
-				deploy := obj.(*v1.Deployment)
-				DelDeployIndex(deploy.Namespace+"/"+deploy.Name, deploy.Namespace)
+				if deploy, ok := obj.(*v1.Deployment); ok {
+					DelDeployIndex(deploy.Namespace+"/"+deploy.Name, deploy.Namespace)
+				}
 				c.queue.Push(Task{handler.Apply, obj, model.EventDelete})
 			},
 		})
@@ -138,6 +143,7 @@ func (c *Controller) HasSynced() bool {
 // Run all controllers until a signal is received
 func (c *Controller) Run(stop <-chan struct{}) {
 	go c.deploy.informer.Run(stop)
+	go c.namespaces.informer.Run(stop)
 
 	<-stop
 	log.Infof("Controller terminated")
@@ -169,4 +175,8 @@ func (c *Controller) ListKeys() []string {
 
 func (c *Controller) GetByKey(key string) (item interface{}, exists bool, err error) {
 	return c.deploy.informer.GetStore().GetByKey(key)
+}
+
+func (c *Controller) GetNameSpacesList() []string {
+	 return c.namespaces.informer.GetStore().ListKeys()
 }

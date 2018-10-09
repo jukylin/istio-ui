@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"strconv"
+	"strings"
 	"github.com/json-iterator/go"
 	"github.com/astaxie/beego"
 	"github.com/jukylin/istio-ui/models"
@@ -161,9 +162,31 @@ func (c *DeployController) Inject() {
 	c.ServeJSON()
 }
 
+/**
+filter namespace eg:kube-public,kube-system
+ */
 func (c *DeployController) GetWorkNameSpaces()  {
-	nameSpaces := pkg.GetWorkNameSpace()
-	c.Data["json"] = map[string]interface{}{"code": 0, "msg": "success", "data" : nameSpaces}
+	filterNamespace := beego.AppConfig.String("filter_namespace")
+	filterNamespaces := strings.Split(filterNamespace, ",")
+	nameSpaceList := models.NameSpacesList()
+
+	var flag bool
+	var allowNameSpace []string
+	for _, nameSpace := range nameSpaceList{
+		flag = false
+		for _, filterNameSpace := range filterNamespaces{
+			if filterNameSpace == nameSpace{
+				flag = true
+				continue
+			}
+		}
+
+		if !flag {
+			allowNameSpace = append(allowNameSpace, nameSpace)
+		}
+	}
+
+	c.Data["json"] = map[string]interface{}{"code": 0, "msg": "success", "data" : allowNameSpace}
 	c.ServeJSON()
 }
 
