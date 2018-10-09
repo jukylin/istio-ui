@@ -15,7 +15,7 @@ func InitDeploy() {
 	options := pkg.ControllerOptions{
 		DomainSuffix : "cluster.local",
 		ResyncPeriod : 60*time.Second,
-		WatchedNamespace : "default",
+		WatchedNamespace : "",
 	}
 	//	//namespace := "default"
 	//	//pod := "example-xxxxx"

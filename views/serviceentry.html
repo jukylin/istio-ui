@@ -96,7 +96,8 @@
         data: {
             istio_config: "",
             handle_name: "serviceentry",
-            handle_namespace: "default"
+            handle_namespace: "default",
+            namespace_options: []
         },
         methods: {
             saveIstioConfig: function () {
@@ -166,7 +167,20 @@
                                 });
                             }
                         });
-            }
+            },
+            getWorkNameSpace: function () {
+                var _self = this;
+                this.$http.get('/deploy/getworknamespaces?').then(function (resp) {
+                    if (resp.body.code === 0) {
+                        _self.namespace_options = resp.body.data;
+                    }else{
+                        this.$message({
+                            message: resp.body.msg,
+                            type: 'error'
+                        });
+                    }
+                });
+            },
         },
         mounted: function () {
             this.getIstioConfig()

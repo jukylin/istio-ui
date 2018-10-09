@@ -32,6 +32,7 @@ func (c *DeployController) List() {
 	namespace := c.Input().Get("namespace")
 	get_page := c.Input().Get("page")
 	get_pagesize := c.Input().Get("page_size")
+	name := c.Input().Get("name")
 
 	if get_page == ""{
 		get_page = "1"
@@ -45,28 +46,35 @@ func (c *DeployController) List() {
 		namespace = "default"
 	}
 
-	page, err := strconv.Atoi(get_page)
-	if err != nil{
-		c.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data" : ""}
-		c.ServeJSON()
+	var deployIndexs []string
+	var total int
+	if name != ""{
+		deployIndexs = []string{namespace + "/" + name}
+		total = 1
+	}else {
+		page, err := strconv.Atoi(get_page)
+		if err != nil {
+			c.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data": ""}
+			c.ServeJSON()
+		}
+
+		pagesize, err := strconv.Atoi(get_pagesize)
+		if err != nil {
+			c.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data": ""}
+			c.ServeJSON()
+		}
+
+		total = pkg.DeployIndexLen(namespace)
+
+		start := (page - 1) * 10
+		end := pagesize
+
+		if total < start+end {
+			end = 0
+		}
+
+		deployIndexs = pkg.GetDeployIndexLimit(start, end, namespace)
 	}
-
-	pagesize, err := strconv.Atoi(get_pagesize)
-	if err != nil{
-		c.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data" : ""}
-		c.ServeJSON()
-	}
-
-	total := pkg.DeployIndexLen(namespace)
-
-	start := (page - 1) * 10
-	end := pagesize
-
-	if total < start + end {
-		end = 0
-	}
-
-	deployIndexs := pkg.GetDeployIndexLimit(start, end, namespace)
 
 	deploysList := models.DeploysList(deployIndexs)
 	var list []listReturnItem
@@ -99,8 +107,6 @@ func (c *DeployController) List() {
 
 		list = append(list, lRI)
 	}
-
-
 
 	c.Data["json"] = map[string]interface{}{"code": 0, "msg": "success", "data" : map[string]interface{}{"list":list, "total":total}}
 	c.ServeJSON()

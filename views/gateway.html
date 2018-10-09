@@ -36,8 +36,13 @@
         <el-main>
             <el-form label-width="100px" class="demo-ruleForm" style="width:600px;">
                 <el-form-item label="namespace">
-                    <el-select v-model="handle_namespace" placeholder="namespace">
-                        <el-option label="default" value="default"></el-option>
+                    <el-select v-model="search_namespace" placeholder="请选择">
+                        <el-option
+                                v-for="item in namespace_options"
+                                :key="item"
+                                :label="item"
+                                :value="item">
+                        </el-option>
                     </el-select>
                 </el-form-item>
 
@@ -96,7 +101,8 @@
         data: {
             istio_config: "",
             handle_name: "gateway",
-            handle_namespace: "default"
+            handle_namespace: "default",
+            namespace_options: []
         },
         methods: {
             saveIstioConfig: function () {
@@ -166,7 +172,20 @@
                                 });
                             }
                         });
-            }
+            },
+            getWorkNameSpace: function () {
+                var _self = this;
+                this.$http.get('/deploy/getworknamespaces?').then(function (resp) {
+                    if (resp.body.code === 0) {
+                        _self.namespace_options = resp.body.data;
+                    }else{
+                        this.$message({
+                            message: resp.body.msg,
+                            type: 'error'
+                        });
+                    }
+                });
+            },
         },
         mounted: function () {
             this.getIstioConfig()

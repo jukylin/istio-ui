@@ -37,7 +37,8 @@
         <el-main>
 
             <el-row>
-                <el-col :span="3">
+
+                <el-col :span="3"><div class="grid-content bg-purple"></div>
                     <el-select v-model="search_namespace" placeholder="请选择">
                         <el-option
                                 v-for="item in namespace_options"
@@ -48,7 +49,11 @@
                     </el-select>
                 </el-col>&nbsp;
 
-                <el-col :span="3">
+                <el-col :span="6" :offset="1">
+                    <el-input v-model="search_name" placeholder="name"></el-input>
+                </el-col>&nbsp;
+
+                <el-col :span="3" :offset="1">
                     <el-button type="primary" @click="search">搜索</el-button>
                 </el-col>
 
@@ -94,11 +99,21 @@
                     v-model="istio_config">
             </el-input>
             <br>
-            <el-button size="small" @click="saveIstioConfig()">保存</el-button>
+            <el-button size="small" @click="sureSave()">保存</el-button>
             <el-button size="small" @click="delIstioConfig()">清空</el-button>
 
         </el-dialog>
 
+        <el-dialog
+                title="提示"
+                :visible.sync="sure_inject"
+                width="30%">
+            <span>服务会被重新部署，确认？</span>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="sure_inject = false">取 消</el-button>
+                <el-button type="primary" @click="saveIstioConfig()">确 定</el-button>
+            </span>
+        </el-dialog>
 
     </el-container>
 </div>
@@ -146,17 +161,18 @@
         data: {
             tableData: [],
             is_show_istio_config: false,
+            sure_inject: false,
             istio_config: "",
             handle_name: "",
             handle_namespace: "",
-            //current_namespace: "default",
+            search_name: "",
             search_namespace: "default",
             pagination: {
                 currentPage: 1,
                 pageSize: 10,
                 total: 0
             },
-            namespace_options: [],
+            namespace_options: []
         },
         methods: {
             getIsInject: function (row) {
@@ -196,24 +212,36 @@
                             }
                         });
             },
+            sureSave: function () {
+                var _self = this;
+                _self.sure_inject = true
+            },
             saveIstioConfig: function () {
                 var _self = this;
+                _self.sure_inject = false
                 _self.is_show_istio_config = true;
-                this.$http.post('/istio_config/save',
-                        {name: _self.handle_name, namespace: _self.handle_namespace, config: _self.istio_config})
-                        .then(function (resp) {
-                            if (resp.body.code === 0) {
-                                this.$message({
-                                    message: "保存成功",
-                                    type: 'success'
-                                });
-                            }else{
-                                this.$message({
-                                    message: resp.body.msg,
-                                    type: 'error'
-                                });
-                            }
-                });
+                if(_self.istio_config == ""){
+                    this.$message({
+                        message: "请填写配置信息",
+                        type: 'error'
+                    });
+                }else {
+                    this.$http.post('/istio_config/save',
+                            {name: _self.handle_name, namespace: _self.handle_namespace, config: _self.istio_config})
+                            .then(function (resp) {
+                                if (resp.body.code === 0) {
+                                    this.$message({
+                                        message: "保存成功",
+                                        type: 'success'
+                                    });
+                                } else {
+                                    this.$message({
+                                        message: resp.body.msg,
+                                        type: 'error'
+                                    });
+                                }
+                            });
+                }
             },
             delIstioConfig:function () {
                 var _self = this;
@@ -236,7 +264,10 @@
             },
             getList: function () {
                 var _self = this;
-                this.$http.get('/deploy/list?' , {params: {page: this.pagination.currentPage, page_size: this.pagination.pageSize, namespace: _self.search_namespace}}).then(function (resp) {
+                this.$http.get('/deploy/list?' , {params: {page: _self.pagination.currentPage,
+                        page_size: _self.pagination.pageSize,
+                        name: _self.search_name,
+                        namespace: _self.search_namespace}}).then(function (resp) {
                     if (resp.body.code === 0) {
                         _self.tableData = resp.body.data.list;
                         _self.pagination.total = resp.body.data.total;

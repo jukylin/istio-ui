@@ -30,7 +30,6 @@ import (
 	"istio.io/istio/pilot/pkg/model"
 	"istio.io/istio/pkg/log"
 	"k8s.io/api/apps/v1"
-	"fmt"
 )
 
 
@@ -145,7 +144,6 @@ func (c *Controller) Run(stop <-chan struct{}) {
 }
 
 func (c *Controller) GetDeployList(deployIndexs []string) []interface{} {
-	fmt.Printf("deployIndexs %+v \n", deployIndexs)
 	list := make([]interface{}, len(deployIndexs))
 	for k, index := range deployIndexs {
 		item, exists, err := c.deploy.informer.GetIndexer().GetByKey(index)
@@ -160,7 +158,6 @@ func (c *Controller) GetDeployList(deployIndexs []string) []interface{} {
 		}
 		list[k] = item
 	}
-	fmt.Printf("list %+v \n", list)
 
 	return list
 }
