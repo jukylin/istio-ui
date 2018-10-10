@@ -5,6 +5,9 @@ var (
 	namespaces = make(map[string][]string, 10)
 )
 
+// create index for k8s Deploy
+// Current use for paging
+// param index eg : Deploy.Name
 func SetDeployIndex(index, namespace string) bool {
 
 	namespaces[namespace] = append(namespaces[namespace], index)
@@ -29,7 +32,8 @@ func ExistsDeployIndex(index, namespace string) bool {
 	return false
 }
 
-
+// Del index
+//will rearrange after del
 func DelDeployIndex(index, namespace string) bool {
 	var deployIndex []string
 	if _, ok := namespaces[namespace]; ok{
@@ -48,7 +52,7 @@ func DelDeployIndex(index, namespace string) bool {
 	return false
 }
 
-
+// return index length
 func DeployIndexLen(namespace string) int {
 	var deployIndex []string
 	if _, ok := namespaces[namespace]; ok{
@@ -75,7 +79,13 @@ func GetDeployIndexLimit(start, end int, namespace string) []string {
 	var deployIndex []string
 	if _, ok := namespaces[namespace]; ok{
 		deployIndex = namespaces[namespace]
-		if end == 0 {
+		if start > len(deployIndex){
+			if len(deployIndex) > 10 {
+				return deployIndex[0:10]
+			}else{
+				return deployIndex[0:]
+			}
+		} else if end == 0 {
 			return deployIndex[start:]
 		}else{
 			return deployIndex[start:end]

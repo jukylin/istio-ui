@@ -50,7 +50,7 @@ func (c *DeployController) List() {
 	var deployIndexs []string
 	var total int
 	if name != ""{
-		deployIndexs = []string{namespace + "/" + name}
+		deployIndexs = []string{name}
 		total = 1
 	}else {
 		page, err := strconv.Atoi(get_page)
