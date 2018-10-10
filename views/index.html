@@ -73,7 +73,7 @@
                     </el-table-column>
                     <el-table-column label="操作" width="260px">
                         <template scope="scope">
-                            <el-button v-if="scope.row.is_inject == 0" size="small" @click="handleInject(scope.row)">注入</el-button>
+                            <el-button v-if="scope.row.is_inject == 0" size="small" @click="sureInject(scope.row)">注入</el-button>
                             <el-button size="small" @click="getIstioConfig(scope.row)">istio配置</el-button>
                         </template>
                     </el-table-column>
@@ -89,7 +89,6 @@
 
         </el-main>
 
-
         <el-dialog title="istio配置" :visible.sync="is_show_istio_config" :close-on-click-modal="false"
                    :close-on-press-escape="false">
             <el-input
@@ -99,7 +98,7 @@
                     v-model="istio_config">
             </el-input>
             <br>
-            <el-button size="small" @click="sureSave()">保存</el-button>
+            <el-button size="small" @click="saveIstioConfig()">保存</el-button>
             <el-button size="small" @click="delIstioConfig()">清空</el-button>
 
         </el-dialog>
@@ -111,7 +110,7 @@
             <span>服务会被重新部署，确认？</span>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="sure_inject = false">取 消</el-button>
-                <el-button type="primary" @click="saveIstioConfig()">确 定</el-button>
+                <el-button type="primary" @click="handleInject()">确 定</el-button>
             </span>
         </el-dialog>
 
@@ -165,6 +164,7 @@
             istio_config: "",
             handle_name: "",
             handle_namespace: "",
+            handle_raw : [],
             search_name: "",
             search_namespace: "default",
             pagination: {
@@ -178,10 +178,11 @@
             getIsInject: function (row) {
                 return row.is_inject == 1 ? '是' : '否';
             },
-            handleInject: function (row) {
-                console.log(row)
-                this.$http.post('/deploy/inject?name='+ row.name + '&namespace='+row.namespace).then(function (resp) {
+            handleInject: function () {
+                var _self = this;
+                this.$http.post('/deploy/inject?name='+ _self.raw.name + '&namespace='+_self.raw.namespace).then(function (resp) {
                     if (resp.body.code === 0) {
+                        _self.sure_inject = false
                         this.$message({
                             message: '注入成功',
                             type: 'success'
@@ -212,9 +213,10 @@
                             }
                         });
             },
-            sureSave: function () {
+            sureInject: function (raw) {
                 var _self = this;
                 _self.sure_inject = true
+                _self.raw = raw
             },
             saveIstioConfig: function () {
                 var _self = this;
