@@ -9,9 +9,9 @@ var (
 // Current use for paging
 // param index eg : Deploy.Name
 func SetDeployIndex(index, namespace string) bool {
-
-	namespaces[namespace] = append(namespaces[namespace], index)
-
+	if ExistsDeployIndex(index, namespace) == false{
+		namespaces[namespace] = append(namespaces[namespace], index)
+	}
 	return true
 }
 

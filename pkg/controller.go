@@ -149,17 +149,17 @@ func (c *Controller) Run(stop <-chan struct{}) {
 	log.Infof("Controller terminated")
 }
 
-func (c *Controller) GetDeployList(deployIndexs []string) []interface{} {
+func (c *Controller) GetDeployList(deployIndexs []string, namespace string) []interface{} {
 	list := make([]interface{}, len(deployIndexs))
 	for k, index := range deployIndexs {
-		item, exists, err := c.deploy.informer.GetIndexer().GetByKey(index)
+		item, exists, err := c.deploy.informer.GetIndexer().GetByKey(namespace + "/" + index)
 		if err != nil {
 			log.Error(err.Error())
 			continue
 		}
 
 		if !exists {
-			log.Error(index + "not exists")
+			log.Error(index + " not exists")
 			continue
 		}
 		list[k] = item

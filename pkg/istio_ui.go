@@ -22,17 +22,7 @@ import (
 Inject the injectConfig and meshConfi to rwa，then post to k8s
  */
 func InjectData(raw []byte) (*appsv1.Deployment, error) {
-	meshConfig, err := GetMeshConfigFromConfigMap()
-	if err != nil {
-		return nil, err
-	}
-
-	injectConfig, err := GetInjectConfigFromConfigMap()
-	if err != nil {
-		return nil, err
-	}
-
-	resource, err := IntoResource(injectConfig, meshConfig, raw)
+	resource, err := GetResource(raw)
 	if err != nil {
 		return nil, err
 	}
@@ -50,6 +40,20 @@ func InjectData(raw []byte) (*appsv1.Deployment, error) {
 	deploy.GetObjectMeta().SetAnnotations(ann)
 
 	return deploy, nil
+}
+
+func GetResource(raw []byte) ([]byte, error) {
+	meshConfig, err := GetMeshConfigFromConfigMap()
+	if err != nil {
+		return nil, err
+	}
+
+	injectConfig, err := GetInjectConfigFromConfigMap()
+	if err != nil {
+		return nil, err
+	}
+
+	return IntoResource(injectConfig, meshConfig, raw)
 }
 
 func UpdateDeploy(deploy *appsv1.Deployment, namespace string) error {
@@ -244,7 +248,7 @@ func GetIstioConfig(filename, namespace string)([]byte, error){
 		return nil, err
 	}
 
-	data, err := ioutil.ReadFile(istioConfigDir + "/" + filename, )
+	data, err := ioutil.ReadFile(istioConfigDir + "/" + filename)
 	if err != nil{
 		return nil, err
 	}

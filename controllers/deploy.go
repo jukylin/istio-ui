@@ -77,7 +77,7 @@ func (c *DeployController) List() {
 		deployIndexs = pkg.GetDeployIndexLimit(start, end, namespace)
 	}
 
-	deploysList := models.DeploysList(deployIndexs)
+	deploysList := models.DeploysList(deployIndexs, namespace)
 	var list []listReturnItem
 	var version,isInject string
 

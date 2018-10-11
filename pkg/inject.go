@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
-
+	"io"
 	"github.com/ghodss/yaml"
 	"github.com/gogo/protobuf/types"
 	"k8s.io/api/batch/v2alpha1"
@@ -34,11 +34,13 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	yamlDecoder "k8s.io/apimachinery/pkg/util/yaml"
 
 	"github.com/hashicorp/go-multierror"
 
 	meshconfig "istio.io/api/mesh/v1alpha1"
 	"istio.io/istio/pkg/log"
+	"bufio"
 )
 
 // per-sidecar policy and status
@@ -528,7 +530,7 @@ func injectionData(sidecarTemplate, version string, deploymentMetadata *metav1.O
 	return &sic, string(statusAnnotationValue), nil
 }
 
-// IntoResourceFile injects the istio proxy into the specified
+// IntoResource injects the istio proxy into the specified
 // kubernetes YAML file.
 func IntoResource(sidecarTemplate string, meshconfig *meshconfig.MeshConfig, raw []byte) ([]byte, error) {
 	obj, err := fromRawToObject(raw)
@@ -552,6 +554,47 @@ func IntoResource(sidecarTemplate string, meshconfig *meshconfig.MeshConfig, raw
 
 	return updated, nil
 }
+
+
+func IntoResourceFile(sidecarTemplate string, meshconfig *meshconfig.MeshConfig, in io.Reader, out io.Writer) error {
+	reader := yamlDecoder.NewYAMLReader(bufio.NewReaderSize(in, 4096))
+	for {
+		raw, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		obj, err := fromRawToObject(raw)
+		if err != nil && !runtime.IsNotRegisteredError(err) {
+			return err
+		}
+
+		var updated []byte
+		if err == nil {
+			outObject, err := intoObject(sidecarTemplate, meshconfig, obj) // nolint: vetshadow
+			if err != nil {
+				return err
+			}
+			if updated, err = yaml.Marshal(outObject); err != nil {
+				return err
+			}
+		} else {
+			updated = raw // unchanged
+		}
+
+		if _, err = out.Write(updated); err != nil {
+			return err
+		}
+		if _, err = fmt.Fprint(out, "---\n"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 
 func fromRawToObject(raw []byte) (runtime.Object, error) {
 	var typeMeta metav1.TypeMeta

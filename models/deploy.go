@@ -25,8 +25,8 @@ func Run(stop <-chan struct{})  {
 	go controller.Run(stop)
 }
 
-func DeploysList(deployIndexs []string) []interface{} {
-	return controller.GetDeployList(deployIndexs)
+func DeploysList(deployIndexs []string, namespace string) []interface{} {
+	return controller.GetDeployList(deployIndexs, namespace)
 }
 
 
