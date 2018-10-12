@@ -1,0 +1,90 @@
+<div>
+    <div class="mod filter">
+        <div class="filter_main">
+            <el-row>
+                <el-col :span="3"><div class="grid-content bg-purple"></div>
+                    <el-select v-model="search_namespace" placeholder="请选择">
+                        <el-option
+                                v-for="item in namespace_options"
+                                :key="item"
+                                :label="item"
+                                :value="item">
+                        </el-option>
+                    </el-select>
+                </el-col>&nbsp;
+
+                <el-col :span="6" :offset="1">
+                    <el-input v-model="search_name" placeholder="name"></el-input>
+                </el-col>&nbsp;
+
+                <el-col :span="3" :offset="1">
+                    <el-button type="primary" @click="search">搜索</el-button>
+                </el-col>
+            </el-row>
+        </div>
+    </div>
+
+    <div class="mod main">
+        <el-row>
+            <el-table :data="tableData">
+                <el-table-column prop="name" label="名称">
+                </el-table-column>
+                <el-table-column prop="namespace" label="空间">
+                </el-table-column>
+                <el-table-column prop="version" label="版本">
+                </el-table-column>
+                <el-table-column prop="is_inject"  :formatter="getIsInject" label="已注入">
+                </el-table-column>
+                <el-table-column prop="create_time" label="创建时间">
+                </el-table-column>
+                <el-table-column label="操作" width="260px">
+                    <template scope="scope">
+                        <el-button v-if="scope.row.is_inject == 0" size="small" @click="sureInject(scope.row)">注入</el-button>
+                        <el-button size="small" @click="getIstioConfig(scope.row)">istio配置</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-row>
+
+        <el-row>
+            <el-col :span="24">
+                <div style="float: right;">
+                    <el-pagination :current-page.sync="pagination.currentPage" :page-size="pagination.pageSize" :total="pagination.total" @current-change="getList" layout="total, prev, pager, next"></el-pagination>
+                </div>
+            </el-col>
+        </el-row>
+
+        <el-dialog title="istio配置" :visible.sync="is_show_istio_config" :close-on-click-modal="false"
+                   :close-on-press-escape="false">
+            <el-form label-position="right" label-width="50px">
+                <el-form-item label="配置" prop="istio_config">
+                    <el-input
+                            type="textarea"
+                            :rows="25"
+                            placeholder="请输入内容"
+                            v-model="istio_config">
+                    </el-input>
+                </el-form-item>
+
+                <el-form-item>
+                    <el-button type="primary" size="small" @click="saveIstioConfig()">保存</el-button>
+                    <el-button size="small" @click="delIstioConfig()">清空</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
+
+        <el-dialog
+                title="提示"
+                :visible.sync="sure_inject"
+                width="30%">
+            <span>服务会被重新部署，确认？</span>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="sure_inject = false">取 消</el-button>
+                <el-button type="primary" @click="handleInject()">确 定</el-button>
+            </span>
+        </el-dialog>
+
+    </div>
+
+
+</div>

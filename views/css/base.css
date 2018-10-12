@@ -1,0 +1,229 @@
+* {
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+}
+
+html {
+    color: #000;
+    background: #e9edf4;
+    height: 100%;
+}
+body {
+    font-family: "Microsoft YaHei";
+    font-size: 14px;
+    height: 100%;
+    position: relative;
+}
+
+body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, code, form, fieldset, legend, input, textarea, p, blockquote, th, td {
+    margin: 0;
+    padding: 0;
+}
+
+#app {
+    height: 100%;
+}
+.el-header {
+    background-color: #B3C0D1;
+    color: #333;
+    line-height: 60px;
+}  
+.el-aside {
+    color: #333;
+}
+.el-main {
+    padding:8px;
+}
+.cursor.pointer {
+    cursor: pointer;
+}
+.el-table thead{color:#333;}
+
+/*消息框*/
+.el-message-box {
+    vertical-align: inherit;
+    position: absolute;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    margin-top: 15%;
+    margin-bottom: 15%;
+}
+/*消息框遮罩*/
+.el-message-box__wrapper{
+    overflow-y: auto;
+}
+
+.el-message-box__header, .el-dialog__header {
+    background: #5e95f2;
+    padding: 15px 0;
+    text-align: center;
+}
+
+.el-message-box__title, .el-dialog__title {
+    line-height: 100%;
+    color: #fff;
+}
+.el-message-box__headerbtn {
+    top: 15px;
+}
+
+.el-dialog__headerbtn {
+    margin-right: 20px;
+}
+
+.el-message-box__headerbtn .el-message-box__close {
+    display: none;
+}
+
+.el-message-box__headerbtn .el-message-box__close, .el-dialog__headerbtn .el-dialog__close {
+    color: #fff;
+}
+
+.el-message-box__headerbtn:focus .el-message-box__close, .el-message-box__headerbtn:hover .el-message-box__close,
+.el-dialog__headerbtn:focus .el-dialog__close, .el-dialog__headerbtn:hover .el-dialog__close {
+    color: #000;
+}
+
+.el-message-box__content {
+    text-align: center;
+}
+
+.el-message-box__btns {
+    text-align: center;
+}
+
+/*模块*/
+.mod {
+    width: 100%;
+    /*border:1px solid #ccc;*/
+    margin-bottom: 15px;
+    background: #fff;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
+/*列表顶部通用filter样式*/
+.filter{
+    padding:15px 10px;
+    /*display: flex;*/
+    overflow: hidden;
+}
+.filter .filter_main{
+    overflow: hidden;
+    float: left;
+    width:100%;
+    /*flex:7;*/
+}
+
+
+/*上传图片*/
+ .avatar-uploader {
+     width: 30%;
+     float:left;
+ }
+ .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 66px;
+    height: 66px;
+    line-height: 66px;
+    text-align: center;
+  }
+  .avatar {
+    width: 66px;
+    height: 66px;
+    display: block;
+  }
+  .avatar-select-list {
+      float:left;
+      margin-right: 2px
+  }
+ /** ad **/
+  .avatar-uploader-ad .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader-ad .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon-ad {
+    font-size: 28px;
+    color: #8c939d;
+    width: 120px;
+    height: 200px;
+    line-height: 200px;
+    text-align: center;
+  }
+  .avatar-ad {
+    width: 120px;
+    height: 200px;
+    display: block;
+  }
+  
+   /** ps**/
+  .avatar-uploader-ps .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader-ps .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon-ps {
+    font-size: 28px;
+    color: #8c939d;
+    width: 200px;
+    height: 130px;
+    line-height: 130px;
+    text-align: center;
+  }
+  .avatar-ps {
+    width: 200px;
+    height: 120px;
+    display: block;
+  }
+ 
+/* 区间时间 */
+.el-date-editor--datetimerange.el-input__inner{
+    width: 100%;
+}
+
+/** 走马灯 **/
+
+.el-carousel__item h3 {
+    color: #475669;
+    font-size: 14px;
+    opacity: 0.75;
+    line-height: 200px;
+    margin: 0;
+}
+
+.el-carousel__item:nth-child(2n) {
+background-color: #99a9bf;
+}
+
+.el-carousel__item:nth-child(2n+1) {
+background-color: #d3dce6;
+}
+
+.el-tag + .el-tag {
+    margin-left: 10px;
+}
+  

@@ -1,0 +1,91 @@
+html {
+    background: #fff;
+}
+
+.login {
+    position: relative;
+}
+
+.login .banner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #4584ec;
+    width: 100%;
+    z-index: 0;
+}
+
+.login .banner img {
+    display: block;
+    width: 100%;
+    max-width: 1446px;
+    /*height: 273px;*/
+    margin: 0 auto;
+    /*background-position: center 0;*/
+}
+
+.login .mod {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 200px;
+    width: 450px;
+    margin: 0 auto;
+    z-index: 1;
+    box-shadow: rgba(22, 113, 230, 0.14) 0 0 30px;
+}
+
+.login .mod .title {
+    padding: 45px 80px;
+    text-align: center;
+    font-size: 20px;
+}
+
+.login .mod .main {
+    padding: 0 80px;
+}
+
+.login .mod .row {
+    margin-bottom: 25px;
+}
+
+.login .mod .row:last-child {
+    margin-bottom: 45px;
+}
+
+.login .mod .captcha {
+    display: flex;
+}
+
+.login .mod .captcha > * {
+    flex: 1;
+}
+
+.login .mod .captcha > img {
+    flex: 0.4;
+    margin-left: 10px;
+}
+
+.login .mod .buttons {
+    display: flex;
+}
+
+.login .mod .buttons > button {
+    flex: 1;
+}
+.login .mod .buttons > button+button{
+    margin-left:10px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

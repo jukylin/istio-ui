@@ -1,0 +1,53 @@
+<el-aside style="height:909px;position:fixed;top:0;left:0;display:inline-block;width:200px;float:left;z-index:9;">
+    <el-menu  
+        :default-active="defaultActive" 
+        class="el-menu-vertical-demo"
+        @open="handleOpen"
+        @close="handleClose"
+        background-color="#545c64"
+        text-color="#fff"
+        active-text-color="#ffd04b"
+        unique-opened
+        @select="menuSelect">
+
+        <el-menu-item index="/">
+            <i class="el-icon-location"></i>
+            <span slot="title"><strong>Istio-ui</strong></span>
+        </el-menu-item>
+        <el-submenu index="2">
+            <template slot="title">
+                <i class="el-icon-menu">&nbsp;&nbsp;</i>
+                <span>K8s</span>
+            </template>
+            <el-menu-item-group>
+                <el-menu-item index="/deploy">
+                    &nbsp;&nbsp;Deployment
+                </el-menu-item>
+            </el-menu-item-group>
+        </el-submenu>           
+        <el-submenu index="3">
+            <template slot="title">
+                <i class="el-icon-share">&nbsp;&nbsp;</i>
+                <span>Istio</span>
+            </template>
+            <el-menu-item-group>
+                <el-menu-item index="/global-istio-config?type=gateway">
+                    &nbsp;&nbsp;GateWay
+                </el-menu-item>
+                <el-menu-item index="/global-istio-config?type=serviceentry">
+                    &nbsp;&nbsp;ServiceEntry
+                </el-menu-item>
+            </el-menu-item-group>
+        </el-submenu>
+        <el-submenu index="4">
+            <template slot="title">
+                <i class="el-icon-star-off">&nbsp;&nbsp;</i>
+                <span>模板</span>
+            </template>
+            <el-menu-item-group>
+            </el-menu-item-group>
+        </el-submenu>
+
+    </el-menu>
+</el-aside>
+

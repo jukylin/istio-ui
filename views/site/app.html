@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Istio-ui</title>
+    <link rel="stylesheet" href="/lib/plugin/element-ui/index.css">
+    <link rel="stylesheet" href="/css/base.css">
+</head>
+<body>
+<div id="app">
+<el-container>
+    <!-- 侧边栏加载 -->
+    <side_bar></side_bar>
+    
+    <!-- main -->
+    <el-container style="min-width:1250px;min-height:100px">
+        <el-header style="text-align: right; font-size:14px;">
+        </el-header>
+        <div style="padding-left:200px;padding-top:5px;width:100%;">
+            <el-main>
+              <router-view></router-view>
+            </el-main>
+        </div>
+    </el-container>
+</el-container>
+</div>
+</body>
+
+<script type="text/javascript" src="/lib/vue.js"></script>
+<script type="text/javascript" src="/lib/vue-router.min.js"></script>
+<script type="text/javascript" src="/lib/plugin/element-ui/index.js"></script>
+<script type="text/javascript" src="/lib/require.js"></script>
+<script type="text/javascript" src="/lib/require_config.js"></script>
+<script type="text/javascript" src="/lib/utils.js"></script>
+
+<script type="text/javascript">
+
+require(['jquery',  "/config/components_config.js", "/config/routers_config.js",],
+function ($,  components_config, routers_config, res) {
+
+    //register public componments
+    components_config();
+
+    //register routers
+    routers_config(function(router){
+        var app = new Vue({
+            router: router,
+            el:'#app'
+        });
+    });
+      
+});
+</script>
+</html>

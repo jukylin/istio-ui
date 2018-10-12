@@ -1,0 +1,475 @@
+* {
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+}
+
+html {
+    color: #000;
+    background: #e9edf4;
+    height: 100%;
+    min-width: 1280px;
+}
+
+body {
+    font-family: "Microsoft YaHei";
+    font-size: 14px;
+    height: 100%;
+    position: relative;
+}
+
+body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, code, form, fieldset, legend, input, textarea, p, blockquote, th, td {
+    margin: 0;
+    padding: 0;
+}
+
+#app {
+    height: 100%;
+}
+
+[v-cloak] {
+    display: none;
+}
+
+.cursor.pointer {
+    cursor: pointer;
+}
+
+/*饿了么css框架定制 -- start*/
+
+/*菜单*/
+.el-menu--dark {
+    background: #292e34;
+}
+
+.el-menu--dark .el-submenu .el-menu {
+    background: #25282a;
+}
+
+.el-menu-item-group__title {
+    display: none;
+}
+
+.el-menu--horizontal.el-menu--dark .el-submenu .el-menu-item.is-active, .el-menu-item.is-active {
+    color: #4584ed;
+}
+
+/*按钮*/
+/*.el-button{
+    color: #4584ed;
+    border-color: #4584ed;
+}*/
+.el-button--primary {
+    color: #fff;
+    background-color: #4584ed;
+    border-color: #4584ed;
+}
+
+.el-button--default:focus, .el-button--default:hover {
+    color: #4584ed;
+    border-color: #4584ed;
+}
+.el-button--primary:focus, .el-button--primary:hover {
+    background: #568eed;
+    border-color: #568eed;
+    color: #fff;
+}
+
+/*消息框*/
+.el-message-box {
+    vertical-align: inherit;
+    position: absolute;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    margin-top: 15%;
+    margin-bottom: 15%;
+}
+/*消息框遮罩*/
+.el-message-box__wrapper{
+    overflow-y: auto;
+}
+
+.el-message-box__header, .el-dialog__header {
+    background: #5e95f2;
+    padding: 15px 0;
+    text-align: center;
+}
+
+.el-message-box__title, .el-dialog__title {
+    line-height: 100%;
+    color: #fff;
+}
+/*.el-message-box__message{
+    max-height: 400px;
+    overflow-y: auto;
+}*/
+.el-message-box__headerbtn {
+    top: 15px;
+}
+
+.el-dialog__headerbtn {
+    margin-right: 20px;
+}
+
+.el-message-box__headerbtn .el-message-box__close {
+    display: none;
+}
+
+.el-message-box__headerbtn .el-message-box__close, .el-dialog__headerbtn .el-dialog__close {
+    color: #fff;
+}
+
+.el-message-box__headerbtn:focus .el-message-box__close, .el-message-box__headerbtn:hover .el-message-box__close,
+.el-dialog__headerbtn:focus .el-dialog__close, .el-dialog__headerbtn:hover .el-dialog__close {
+    color: #000;
+}
+
+.el-message-box__content {
+    text-align: center;
+}
+
+.el-message-box__btns {
+    text-align: center;
+}
+
+/*对话框*/
+.el-dialog__footer {
+    text-align: center;
+}
+
+/*选择器*/
+.el-select {
+    width: 100%;
+}
+
+/*时间选择器*/
+.el-date-editor--daterange.el-input {
+    width: 100%;
+}
+
+.el-date-editor.el-input{
+    width:100%;
+}
+
+/*面包屑*/
+.el-breadcrumb {
+    margin-bottom: 15px;
+}
+
+/*折叠面板*/
+.el-collapse-item__header {
+    position: relative;
+}
+
+.el-collapse-item__header__arrow {
+    position: absolute;
+    right: 15px;
+    height: 13px;
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
+}
+/*去除多按钮左侧间距*/
+.el-button+.el-button {
+    margin-left: 0px;
+}
+
+/*加载遮罩*/
+.el-loading-mask {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/*对话框表单*/
+/*.el-form .el-form-item:last-child{
+    margin-bottom: 0;
+}*/
+.el-form .el-form-item__content{
+
+}
+.el-form .el-form-item__content .el-radio-group{
+
+}
+.el-form .el-form-item__content .el-radio-group .el-radio{
+    display: block;
+    padding:10px 0;
+}
+.el-form .el-form-item__content .el-radio-group .el-radio+.el-radio{
+    margin: 0;
+}
+
+
+/*饿了么css定制--end*/
+
+/*顶部栏*/
+#top_banner {
+    background: #fff;
+    /*border-bottom:1px solid #fff;*/
+    top: 0;
+    left: 0;
+    position: fixed;
+    width: 100%;
+    height: 50px;
+    z-index: 10;
+}
+
+#top_banner .logo {
+    width: 200px;
+    height: 100%;
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #4584ed;
+    color: #fff;
+    text-align: center;
+    padding: 18px 0;
+    /*border-bottom:1px solid #292e34;*/
+    border-bottom: 1px solid #4584ed;
+}
+
+#top_banner .nav {
+    display: inline-block;
+    padding-left: 200px;
+    padding-right: 250px;
+    width: 100%;
+    height: 100%;
+    border-bottom: 1px solid #e9edf4;
+    /*box-shadow: 0 1px #e9edf4;*/
+}
+
+#top_banner .userinfo {
+    display: inline-block;
+    width: 250px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    text-align: center;
+}
+
+#top_banner .userinfo > * {
+    display: inline-block;
+    vertical-align: top;
+    margin: 15px 0;
+    padding: 0 10px;
+}
+
+#top_banner .userinfo > .avatar {
+    margin: 13px 0;
+    padding: 0;
+    height: 24px;
+}
+
+#top_banner .userinfo > .avatar img {
+    max-width: 24px;
+    max-height: 24px;
+}
+
+#top_banner .userinfo > .username {
+    border-right: 1px solid #d7d7d7;
+    max-width: 175px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/*容器*/
+#container {
+    position: relative;
+    padding-top: 50px;
+}
+
+/*侧栏*/
+#side_bar {
+    padding-top: 50px;
+    background: #292e34;
+    vertical-align: top;
+    display: inline-block;
+    height: 100%;
+    overflow-y: auto;
+    width: 200px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9;
+}
+
+.el-submenu__title {
+    width:200px;
+}
+li.el-menu-item {
+    width: 200px;
+}
+li.el-menu-item.is-active {
+    width:200px;
+}
+
+/*路由部分*/
+#router {
+    vertical-align: top;
+    display: inline-block;
+    height: 100%;
+    width: 100%;
+    padding: 15px;
+    padding-left: 215px;
+}
+
+/*模块*/
+.mod {
+    width: 100%;
+    /*border:1px solid #ccc;*/
+    margin-bottom: 15px;
+    background: #fff;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
+
+/*列表顶部通用filter样式*/
+.filter{
+    padding:25px 20px;
+    /*display: flex;*/
+    overflow: hidden;
+}
+.filter .filter_main{
+    overflow: hidden;
+    float: left;
+    width:100%;
+    /*flex:7;*/
+}
+.filter .buttons{
+    /*flex:1;*/
+    float: left;
+    width:15%;
+    padding-left:15px;
+    overflow: hidden;
+}
+.filter .buttons button{
+    float:left;
+    margin:6px 3px;
+    margin-top:0px;
+}
+
+.filter .filter_main .item{
+    float: left;
+    position: relative;
+    width:33.3%;
+}
+.filter .filter_main .item.item-2{
+    width:50%;
+}
+.filter .item+.item{
+    padding-left: 5px;
+}
+.filter .item>.label{
+    display: inline-block;
+    width:20%;
+    text-align: center;
+    float:left;
+    padding: 8px 0;
+}
+.filter .item>.input_mod{
+    display: inline-block;
+    width:80%;
+    float:left;
+}
+.filter .item>.input_mod.input_mod-2{
+    width:40%;
+    padding-right:10px;
+}
+.filter .item>.input_mod.input_mod-2:last-child{
+    padding-right:0;
+}
+
+.el-table thead{color:#333;}
+
+/*上传图片*/
+ .avatar-uploader {
+     width: 30%;
+     float:left;
+ }
+ .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 66px;
+    height: 66px;
+    line-height: 66px;
+    text-align: center;
+  }
+  .avatar {
+    width: 66px;
+    height: 66px;
+    display: block;
+  }
+  .avatar-select-list {
+      float:left;
+      margin-right: 2px
+  }
+  
+  /** ad **/
+  .avatar-uploader-ad .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader-ad .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon-ad {
+    font-size: 28px;
+    color: #8c939d;
+    width: 120px;
+    height: 200px;
+    line-height: 200px;
+    text-align: center;
+  }
+  .avatar-ad {
+    width: 120px;
+    height: 200px;
+    display: block;
+  }
+  
+   /** ps**/
+  .avatar-uploader-ps .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader-ps .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon-ps {
+    font-size: 28px;
+    color: #8c939d;
+    width: 200px;
+    height: 130px;
+    line-height: 130px;
+    text-align: center;
+  }
+  .avatar-ps {
+    width: 200px;
+    height: 120px;
+    display: block;
+  }
+  
+  
+/* 区间时间 */
+.el-date-editor--datetimerange.el-input__inner{
+    width: 100%;
+}
+  
