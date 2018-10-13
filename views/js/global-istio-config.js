@@ -1,8 +1,8 @@
 define(function (require,exports,module) {
     module.exports = function() {
-        var temp = require('text!/pages/gateway.html');
+        var temp = require('text!/pages/global-istio-config.html');
         require("https://cdn.jsdelivr.net/npm/vue-resource@1.5.1")
-
+        Vue.http.options.emulateJSON = true;
         return {
             template: temp,
             data: function (){
@@ -35,6 +35,13 @@ define(function (require,exports,module) {
                 },
                 saveIstioConfig: function () {
                     var _self = this;
+                    if(_self.istio_config == ""){
+                        this.$message({
+                            message: "请填写配置信息",
+                            type: 'error'
+                        });
+                        return false
+                    }
                     this.$http.post('/istio_config/save',
                         {name: _self.handle_name, namespace: _self.search_namespace, config: _self.istio_config})
                         .then(function (resp) {
@@ -53,7 +60,8 @@ define(function (require,exports,module) {
                 },
                 delIstioConfig:function () {
                     var _self = this;
-                    this.$http.post('/istio_config/del', {name: _self.handle_name, namespace: _self.search_namespace, config: _self.istio_config})
+
+                    this.$http.post('/istio_config/del', {name: _self.handle_name, namespace: _self.search_namespace})
                         .then(function (resp) {
                             if (resp.body.code === 0) {
                                 _self.istio_config = ""

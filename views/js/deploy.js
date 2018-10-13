@@ -1,8 +1,8 @@
 define(function (require,exports,module) {
     module.exports = function() {
-        // console.log('加载组件-顶部栏');
         var temp = require('text!/pages/deploy.html');
         require("https://cdn.jsdelivr.net/npm/vue-resource@1.5.1")
+        Vue.http.options.emulateJSON = true;
 
         return {
             template: temp,
@@ -77,28 +77,29 @@ define(function (require,exports,module) {
                     var _self = this;
                     _self.sure_inject = false
                     _self.is_show_istio_config = true;
-                    if(_self.istio_config == ""){
+                    if(_self.istio_config == "") {
                         this.$message({
                             message: "请填写配置信息",
                             type: 'error'
                         });
-                    }else {
-                        this.$http.post('/istio_config/save',
-                            {name: _self.handle_name, namespace: _self.handle_namespace, config: _self.istio_config})
-                            .then(function (resp) {
-                                if (resp.body.code === 0) {
-                                    this.$message({
-                                        message: "保存成功",
-                                        type: 'success'
-                                    });
-                                } else {
-                                    this.$message({
-                                        message: resp.body.msg,
-                                        type: 'error'
-                                    });
-                                }
-                            });
+                        return false
                     }
+
+                    this.$http.post('/istio_config/save',
+                        {name: _self.handle_name, namespace: _self.handle_namespace, config: _self.istio_config})
+                        .then(function (resp) {
+                            if (resp.body.code === 0) {
+                                this.$message({
+                                    message: "保存成功",
+                                    type: 'success'
+                                });
+                            } else {
+                                this.$message({
+                                    message: resp.body.msg,
+                                    type: 'error'
+                                });
+                            }
+                        });
                 },
                 delIstioConfig:function () {
                     var _self = this;

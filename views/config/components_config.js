@@ -1,4 +1,3 @@
-
 define(function (require, exports, module) {
     module.exports = function () {
         // console.log('注册组件');
