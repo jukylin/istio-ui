@@ -4,6 +4,7 @@ define(function (require, exports, module) {
           { path: '/', redirect: '/deploy' },
           { path: '/deploy', component: require("/js/deploy.js")()},
           { path: '/global-istio-config', component: require("/js/global-istio-config.js")()},
+          { path: '/template', component: require("/js/template.js")()},
         ];
         const router = new VueRouter({
            routes: routes,

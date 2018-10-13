@@ -25,4 +25,5 @@ func init() {
 	beego.AutoRouter(&controllers.DeployController{})
 	beego.AutoRouter(&controllers.Istio_ConfigController{})
 	beego.AutoRouter(&controllers.InjectController{})
+	beego.AutoRouter(&controllers.TemplateController{})
 }

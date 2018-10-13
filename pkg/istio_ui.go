@@ -78,16 +78,17 @@ func applyLastConfig(resource []byte) (map[string]string, error)  {
 	return ann, nil
 }
 
+
 /**
-get mesh config from k8s
+get mesh's config from k8s
  */
-func GetMeshConfigFromConfigMap() (*meshconfig.MeshConfig, error) {
+func GetMeshConfig() (string, error) {
 	client := GetKubeClent()
 
 	config, err := client.CoreV1().ConfigMaps(kube.IstioNamespace).Get("istio", metav1.GetOptions{})
 
 	if err != nil {
-		return nil, fmt.Errorf("could not read valid configmap %q from namespace  %q: %v - "+
+		return "", fmt.Errorf("could not read valid configmap %q from namespace  %q: %v - "+
 			"Use --meshConfigFile or re-run kube-inject with `-i <istioSystemNamespace> and ensure valid MeshConfig exists",
 			"istio", kube.IstioNamespace, err)
 	}
@@ -96,14 +97,28 @@ func GetMeshConfigFromConfigMap() (*meshconfig.MeshConfig, error) {
 	// key
 	configYaml, exists := config.Data["mesh"]
 	if !exists {
-		return nil, fmt.Errorf("missing configuration map key %q", "mesh")
+		return "", fmt.Errorf("missing configuration map key %q", "mesh")
+	}
+
+	return configYaml, nil
+}
+
+
+/**
+get mesh's config from k8s
+ */
+func GetMeshConfigFromConfigMap() (*meshconfig.MeshConfig, error) {
+
+	configYaml, err := GetMeshConfig()
+	if err != nil {
+		return nil, err
 	}
 
 	return ApplyMeshConfigDefaults(configYaml)
 }
 
 /**
-get inject config from k8s
+get inject's config from k8s
  */
 func GetInjectConfigFromConfigMap() (string, error) {
 	client := GetKubeClent()
