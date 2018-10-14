@@ -13,6 +13,7 @@ spec:
     name: http
   selector:
     app: istio-ui
+  type: LoadBalancer
 ---
 apiVersion: apps/v1 
 kind: Deployment
@@ -30,7 +31,7 @@ spec:
     spec:
       containers:
       - name: istio-ui
-        image: registry.cn-shenzhen.aliyuncs.com/jukylin/istio-ui
+        image: registry.cn-shenzhen.aliyuncs.com/jukylin/istio-ui:v1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9100

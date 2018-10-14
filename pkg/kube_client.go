@@ -13,9 +13,7 @@ var configClient *crd.Client
 
 func InitKubeClient()  {
 	kubeConfigPath := beego.AppConfig.String("kube_config_dir")
-	if kubeConfigPath == ""{
-		kubeConfigPath = clientcmd.RecommendedHomeFile
-	}
+
 	//NewNonInteractiveDeferredLoadingClientConfig
 	config, err := clientcmd.BuildConfigFromFlags("", kubeConfigPath)
 	if err != nil {
@@ -31,9 +29,6 @@ func InitKubeClient()  {
 
 func InitConfigClient()  {
 	kubeConfigPath := beego.AppConfig.String("kube_config_dir")
-	if kubeConfigPath == ""{
-		kubeConfigPath = clientcmd.RecommendedHomeFile
-	}
 
 	client, err := crd.NewClient(kubeConfigPath, "",
 		istiomodel.IstioConfigTypes, "")
