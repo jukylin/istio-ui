@@ -14,13 +14,13 @@ import (
 )
 
 func init() {
-	beego.SetStaticPath("/static","/views")
-	beego.SetStaticPath("/lib","/views/lib")
-	beego.SetStaticPath("/css","/views/css")
-	beego.SetStaticPath("/js","/views/js")
-	beego.SetStaticPath("/config","/views/config")
-	beego.SetStaticPath("/components","/views/components")
-	beego.SetStaticPath("/pages","/views/pages")
+	beego.SetStaticPath("/static","views")
+	beego.SetStaticPath("/lib","views/lib")
+	beego.SetStaticPath("/css","views/css")
+	beego.SetStaticPath("/js","views/js")
+	beego.SetStaticPath("/config","views/config")
+	beego.SetStaticPath("/components","views/components")
+	beego.SetStaticPath("/pages","views/pages")
 
 	beego.AutoRouter(&controllers.DeployController{})
 	beego.AutoRouter(&controllers.Istio_ConfigController{})

@@ -3,7 +3,7 @@ package pkg
 import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-	"istio.io/istio/pilot/pkg/config/kube/crd"
+	"github.com/jukylin/istio-ui/pkg/config/kube/crd"
 	istiomodel "istio.io/istio/pilot/pkg/model"
 	"github.com/astaxie/beego"
 )
@@ -34,6 +34,7 @@ func InitConfigClient()  {
 	if kubeConfigPath == ""{
 		kubeConfigPath = clientcmd.RecommendedHomeFile
 	}
+
 	client, err := crd.NewClient(kubeConfigPath, "",
 		istiomodel.IstioConfigTypes, "")
 	if err != nil {

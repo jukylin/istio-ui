@@ -1,0 +1,49 @@
+##################################################################################################
+# Details service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: istio-ui
+  labels:
+    app: istio-ui
+spec:
+  ports:
+  - port: 9100
+    name: http
+  selector:
+    app: istio-ui
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: istio-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+     app: istio-ui
+  template:
+    metadata:
+      labels:
+        app: istio-ui
+    spec:
+      containers:
+      - name: istio-ui
+        image: registry.cn-shenzhen.aliyuncs.com/jukylin/istio-ui
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9100
+        volumeMounts:
+        - mountPath: /data/www/istio_config
+          name: istio-config
+        - mountPath: /data/www/istio_upload
+          name: istio-upload
+      volumes:
+      - name: istio-config
+        hostPath:
+          path: /data/www/istio_config
+      - name: istio-upload
+        hostPath:
+          path: /data/www/istio_upload
+---
