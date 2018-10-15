@@ -16,6 +16,7 @@ func main() {
 	stop := make(chan struct{})
 	pkg.InitKubeClient()
 	pkg.InitConfigClient()
+	pkg.InitDeployIndexStore()
 	models.InitController()
 	models.Run(stop)
 

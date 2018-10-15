@@ -18,6 +18,9 @@ import (
 	"strings"
 )
 
+var DeployStore DeployIndexStore
+
+
 /**
 Inject the injectConfig and meshConfi to rwa，then post to k8s
  */
@@ -314,4 +317,9 @@ func GetWorkNameSpace() []string {
 	work_namespace := beego.AppConfig.String("work_namespace")
 	nameSpaces := strings.Split(work_namespace, ",")
 	return nameSpaces
+}
+
+
+func InitDeployIndexStore()  {
+	DeployStore = NewDeployIndexStore()
 }

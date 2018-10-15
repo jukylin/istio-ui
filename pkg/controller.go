@@ -112,7 +112,7 @@ func (c *Controller) createCacheHandler(informer cache.SharedIndexInformer, otyp
 			// TODO: filtering functions to skip over un-referenced resources (perf)
 			AddFunc: func(obj interface{}) {
 				if deploy, ok := obj.(*v1.Deployment); ok {
-					SetDeployIndex(deploy.Name, deploy.Namespace)
+					DeployStore.Add(deploy.Name, deploy.Namespace)
 				}
 				c.queue.Push(Task{handler.Apply, obj, model.EventAdd})
 			},
@@ -123,7 +123,7 @@ func (c *Controller) createCacheHandler(informer cache.SharedIndexInformer, otyp
 			},
 			DeleteFunc: func(obj interface{}) {
 				if deploy, ok := obj.(*v1.Deployment); ok {
-					DelDeployIndex(deploy.Name, deploy.Namespace)
+					DeployStore.Delete(deploy.Name, deploy.Namespace)
 				}
 				c.queue.Push(Task{handler.Apply, obj, model.EventDelete})
 			},
