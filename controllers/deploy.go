@@ -119,6 +119,18 @@ func (c *DeployController) Inject() {
 	name := c.Input().Get("name")
 	namespace := c.Input().Get("namespace")
 
+	//是否允许注入
+	fileterName := beego.AppConfig.String("fileter_name")
+	if fileterName != "" {
+		fileterArr := strings.Split(fileterName, ",")
+		for _, v := range fileterArr{
+			if name == v {
+				c.Data["json"] = map[string]interface{}{"code": -1, "msg": v + "不允许注入", "data" : nil}
+				c.ServeJSON()
+			}
+		}
+	}
+
 	item, exists, err := models.GetByKey(namespace + "/" + name)
 	if err != nil{
 		c.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data" : nil}
