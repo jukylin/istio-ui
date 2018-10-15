@@ -65,7 +65,7 @@ func (c *DeployController) List() {
 			c.ServeJSON()
 		}
 
-		total = pkg.DeployIndexLen(namespace)
+		total = pkg.DeployStore.Len(namespace)
 
 		start := (page - 1) * 10
 		end := pagesize
@@ -74,7 +74,7 @@ func (c *DeployController) List() {
 			end = 0
 		}
 
-		deployIndexs = pkg.GetDeployIndexLimit(start, end, namespace)
+		deployIndexs = pkg.DeployStore.GetLimit(start, end, namespace)
 	}
 
 	deploysList := models.DeploysList(deployIndexs, namespace)
@@ -123,9 +123,9 @@ func (c *DeployController) Inject() {
 	fileterName := beego.AppConfig.String("fileter_name")
 	if fileterName != "" {
 		fileterArr := strings.Split(fileterName, ",")
-		for _, v := range fileterArr{
-			if name == v {
-				c.Data["json"] = map[string]interface{}{"code": -1, "msg": v + "不允许注入", "data" : nil}
+		for _, filterName := range fileterArr{
+			if name == filterName {
+				c.Data["json"] = map[string]interface{}{"code": -1, "msg": filterName + "不允许注入", "data" : nil}
 				c.ServeJSON()
 			}
 		}
@@ -203,7 +203,7 @@ func (c *DeployController) GetWorkNameSpaces()  {
 }
 
 func (c *DeployController) GetDeployIndex()  {
-	deployIndexs := pkg.GetAllDeployIndex("default")
+	deployIndexs := pkg.DeployStore.GetAll("default")
 	c.Data["json"] = map[string]interface{}{"code": 0, "msg": "success", "data" : deployIndexs}
 	c.ServeJSON()
 }
