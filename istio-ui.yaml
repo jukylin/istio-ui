@@ -15,7 +15,7 @@ spec:
     app: istio-ui
   type: LoadBalancer
 ---
-apiVersion: apps/v1 
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: istio-ui
@@ -29,9 +29,10 @@ spec:
       labels:
         app: istio-ui
     spec:
+      serviceAccountName: istio-ui-service-account
       containers:
       - name: istio-ui
-        image: registry.cn-shenzhen.aliyuncs.com/jukylin/istio-ui:v1
+        image: registry.cn-shenzhen.aliyuncs.com/jukylin/istio-ui:v2
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9100
@@ -47,4 +48,35 @@ spec:
       - name: istio-upload
         hostPath:
           path: /data/www/istio_upload
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-ui-service-account
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: istio-ui-cluster-role
+rules:
+- apiGroups: [""]
+  resources: ["namespaces", "configmaps"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: istio-ui-cluster-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: istio-ui-cluster-role
+subjects:
+  - kind: ServiceAccount
+    name: istio-ui-service-account
+    namespace: default
 ---
