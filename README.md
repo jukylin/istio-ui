@@ -11,7 +11,7 @@
   > 将你需要注入的文件发送到远程api接口
   
   > kubectl apply -f <(curl -F "config=@samples/bookinfo/platform/kube/bookinfo.yaml" http://localhost:9100/inject/file)
-* 文件内容注入
+* 内容注入
   > 将你需要注入的内容发送到远程api接口
   
   > kubectl apply -f <(curl -X POST --data-binary @samples/bookinfo/platform/kube/bookinfo.yaml -H "Content-type: text/yaml" http://localhost:9100/inject/context)
