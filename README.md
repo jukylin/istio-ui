@@ -22,7 +22,7 @@
 * docker
 > &nbsp;&nbsp;&nbsp;&nbsp;设置 [KUBECONFIG](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/#create-a-second-configuration-file)
 
-> &nbsp;&nbsp;&nbsp;&nbsp;docker run -itd -v $KUBECONFIG:$HOME/.kube/config -p9100:9100 --name istio-ui --env KUBECONFIG=$HOME/.kube/config istio-ui
+> &nbsp;&nbsp;&nbsp;&nbsp;docker run -itd -v $KUBECONFIG:$HOME/.kube/config -p9100:9100 --name istio-ui --env KUBECONFIG=$HOME/.kube/config registry.cn-shenzhen.aliyuncs.com/jukylin/istio-ui:latest
 
 * k8s
-> &nbsp;&nbsp;&nbsp;&nbsp;kubectl apply -f ./istio-ui.yaml
+> &nbsp;&nbsp;&nbsp;&nbsp;kubectl apply -f https://raw.githubusercontent.com/jukylin/istio-ui/master/istio-ui.yaml
