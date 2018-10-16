@@ -38,3 +38,9 @@
 * FILTER_NAMESPACES  被过滤的namespaces，默认：kube-public,kube-system,istio-system
 
 * FILTER_NAME  不进行注入的name，默认：redis,mysql,istio-ui
+
+### 浏览器预览
+> http://localhost:9100/static/index.html#/deploy
+
+![istio-ui](https://upload.cc/i1/2018/10/16/Sna43Z.jpg)
+
