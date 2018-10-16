@@ -42,5 +42,5 @@
 ### 浏览器预览
 > http://localhost:9100/static/index.html#/deploy
 
-![istio-ui](https://upload.cc/i1/2018/10/16/Sna43Z.jpg)
+![istio-ui](https://upload.cc/i1/2018/10/16/FC6s7n.png)
 
