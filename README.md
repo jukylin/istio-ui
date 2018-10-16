@@ -26,3 +26,17 @@
 
 * k8s
 > &nbsp;&nbsp;&nbsp;&nbsp;kubectl apply -f https://raw.githubusercontent.com/jukylin/istio-ui/master/istio-ui.yaml
+
+
+### 配置
+> istio-ui通过环境变量来进行
+
+* ISTIO_CONFIG_DIR  配置存放目录
+
+* INJECT_UPLOAD_TMP_FILE_DIR  文件上传临时存放目录，默认：/data/www/istio_config
+
+* INJECT_UPLOAD_TMP_FILE_DIR  文件上传临时存放目录，默认：/data/www/istio_upload
+
+* FILTER_NAMESPACES  被过滤的namespaces，默认：kube-public,kube-system,istio-system
+
+* FILTER_NAME  不进行注入的name，默认：redis,mysql,istio-ui
