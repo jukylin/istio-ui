@@ -1,7 +1,7 @@
 define(function (require,exports,module) {
     module.exports = function() {
         var temp = require('text!/pages/deploy.html');
-        require("https://cdn.jsdelivr.net/npm/vue-resource@1.5.1")
+        require("/lib/vue-resource.min.js")
         Vue.http.options.emulateJSON = true;
 
         return {
