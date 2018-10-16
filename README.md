@@ -29,11 +29,9 @@
 
 
 ### 配置
-> istio-ui通过环境变量来进行
+> 使用环境变量
 
-* ISTIO_CONFIG_DIR  配置存放目录
-
-* INJECT_UPLOAD_TMP_FILE_DIR  文件上传临时存放目录，默认：/data/www/istio_config
+* ISTIO_CONFIG_DIR  配置文件存放目录，默认：/data/www/istio_config
 
 * INJECT_UPLOAD_TMP_FILE_DIR  文件上传临时存放目录，默认：/data/www/istio_upload
 
