@@ -32,7 +32,7 @@ spec:
       serviceAccountName: istio-ui-service-account
       containers:
       - name: istio-ui
-        image: registry.cn-shenzhen.aliyuncs.com/jukylin/istio-ui:v2
+        image: registry.cn-shenzhen.aliyuncs.com/jukylin/istio-ui:v0.1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9100
