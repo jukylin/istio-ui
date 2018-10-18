@@ -64,7 +64,7 @@ rules:
   verbs: ["get", "list", "watch"]
 - apiGroups: ["apps"]
   resources: ["deployments"]
-  verbs: ["get", "list", "watch"]
+  verbs: ["get", "list", "watch", "update", "create"]
 - apiGroups: ["config.istio.io"] # istio CRD watcher
   resources: ["*"]
   verbs: ["create", "get", "list", "watch", "patch"]
