@@ -1,6 +1,6 @@
 # istio-ui
 
-## &nbsp;&nbsp;&nbsp;&nbsp;istio-ui用于管理istio配置文件，目的是减轻运维的配置工作。主要实现：注入，istio配置和模板（还在开发中）等功能。
+## &nbsp;&nbsp;&nbsp;&nbsp;istio-ui用于管理istio配置，目的是减轻运维的配置工作。主要实现：注入，istio配置和模板（还在开发中）等功能。
 ## 为了保证注入和配置的原生性，参考和使用了istio的源码。
 
 
