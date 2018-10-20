@@ -9,6 +9,7 @@ import (
 	"github.com/jukylin/istio-ui/pkg"
 	appv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/api/core/v1"
 	yaml2 "github.com/ghodss/yaml"
 )
 
@@ -150,12 +151,12 @@ func (c *DeployController) Inject() {
 	}
 
 	Anno := deploy.GetObjectMeta().GetAnnotations()
-	if _, ok := Anno[pkg.LastAppliedConfigAnnotation]; !ok{
+	if _, ok := Anno[corev1.LastAppliedConfigAnnotation]; !ok{
 		c.Data["json"] = map[string]interface{}{"code": -1, "msg": "lost last configuration", "data" : nil}
 		c.ServeJSON()
 	}
 
-	lastConfig := Anno[pkg.LastAppliedConfigAnnotation]
+	lastConfig := Anno[corev1.LastAppliedConfigAnnotation]
 	yd, err := yaml2.JSONToYAML([]byte(lastConfig))
 
 	deploy, err = pkg.InjectData(yd)

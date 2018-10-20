@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 	"errors"
+	"strings"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	//"istio.io/istio/pilot/pkg/kube/inject"
 	meshconfig "istio.io/api/mesh/v1alpha1"
@@ -15,7 +17,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	"github.com/astaxie/beego"
 	istiomodel "istio.io/istio/pilot/pkg/model"
-	"strings"
+	corev1 "k8s.io/api/core/v1"
 )
 
 var DeployStore DeployIndexStore
@@ -76,7 +78,7 @@ func applyLastConfig(resource []byte) (map[string]string, error)  {
 	if err != nil {
 		return nil, err
 	}
-	ann[LastAppliedConfigAnnotation] = string(json)
+	ann[corev1.LastAppliedConfigAnnotation] = string(json)
 
 	return ann, nil
 }
