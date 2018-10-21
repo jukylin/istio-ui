@@ -20,6 +20,7 @@ func (this *Istio_ConfigController) Get() {
 	name := this.Input().Get("name")
 	namespace := this.Input().Get("namespace")
 	exists, err := pkg.CheckIstioConfigIsExists(name + ".yaml", namespace)
+
 	if err != nil{
 		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data": nil}
 		this.ServeJSON()
@@ -35,7 +36,13 @@ func (this *Istio_ConfigController) Get() {
 		istio_config = nil
 	}
 
-	this.Data["json"] = map[string]interface{}{"code": 0, "msg": "success", "data" : string(istio_config)}
+	backedup, err := pkg.CheckBackUpIsExists(name + ".yaml", namespace)
+	if err != nil {
+		beego.Error(err.Error())
+	}
+	info := map[string]interface{}{"backedup":backedup, "data": string(istio_config)}
+
+	this.Data["json"] = map[string]interface{}{"code": 0, "msg": "success", "data" : info}
 	this.ServeJSON()
 }
 
@@ -55,15 +62,15 @@ func (this *Istio_ConfigController) Save() {
 		this.ServeJSON()
 	}
 
-	// write to istio_config_dir
-	err = pkg.WriteIstioConfig([]byte(configStr), name + ".yaml", namespace)
+	//post to k8s
+	err = pkg.PostIstioConfig(configs, namespace)
 	if err != nil{
 		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data": nil}
 		this.ServeJSON()
 	}
 
-	//post to k8s
-	err = pkg.PostIstioConfig(configs, namespace)
+	// write to istio_config_dir
+	err = pkg.WriteIstioConfig([]byte(configStr), name + ".yaml", namespace)
 	if err != nil{
 		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data": nil}
 		this.ServeJSON()
@@ -100,18 +107,44 @@ func (this *Istio_ConfigController) Del() {
 		this.ServeJSON()
 	}
 
-	err = pkg.DelLocalIstioConfig(fileName, namespace)
-	if err != nil{
-		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data": nil}
-		this.ServeJSON()
-	}
-
 	err = pkg.DelRemoteIstioConfig(configs, namespace)
 	if err != nil{
 		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data": nil}
 		this.ServeJSON()
 	}
 
+	err = pkg.DelLocalIstioConfig(fileName, namespace)
+	if err != nil{
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data": nil}
+		this.ServeJSON()
+	}
+
 	this.Data["json"] = map[string]interface{}{"code": 0, "msg": "success", "data" : ""}
+	this.ServeJSON()
+}
+
+func (this *Istio_ConfigController) GetBackUp()  {
+	name := this.Input().Get("name")
+	namespace := this.Input().Get("namespace")
+	fileName := name + ".yaml"
+
+	exists, err := pkg.CheckBackUpIsExists(fileName, namespace)
+	if err != nil{
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data": nil}
+		this.ServeJSON()
+	}
+
+	if exists == false{
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": "not backed up", "data": nil}
+		this.ServeJSON()
+	}
+
+	data, err := pkg.GetBackedUpIstioConfig(fileName, namespace)
+	if err != nil{
+		this.Data["json"] = map[string]interface{}{"code": -1, "msg": err.Error(), "data": nil}
+		this.ServeJSON()
+	}
+
+	this.Data["json"] = map[string]interface{}{"code": 0, "msg": "success", "data" : string(data)}
 	this.ServeJSON()
 }

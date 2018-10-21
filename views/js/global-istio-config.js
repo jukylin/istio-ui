@@ -10,7 +10,8 @@ define(function (require,exports,module) {
                     istio_config: "",
                     handle_name: "gateway",
                     namespace_options: [],
-                    search_namespace: "default"
+                    search_namespace: "default",
+                    backedup: false
                 }
             },
             mounted : function () {
@@ -24,7 +25,8 @@ define(function (require,exports,module) {
                     this.$http.get('/istio_config/get?name='+ _self.handle_name + '&namespace=' + _self.search_namespace)
                         .then(function (resp) {
                             if (resp.body.code === 0) {
-                                _self.istio_config = resp.body.data
+                                _self.istio_config = resp.body.data.data
+                                _self.backedup = resp.body.data.backedup
                             }else{
                                 this.$message({
                                     message: resp.body.msg,
@@ -50,6 +52,20 @@ define(function (require,exports,module) {
                                     message: "保存成功",
                                     type: 'success'
                                 });
+                            }else{
+                                this.$message({
+                                    message: resp.body.msg,
+                                    type: 'error'
+                                });
+                            }
+                        });
+                },
+                getBackUp: function () {
+                    var _self = this;
+                    this.$http.get('/istio_config/getbackup?name='+ _self.handle_name + '&namespace=' + _self.handle_namespace)
+                        .then(function (resp) {
+                            if (resp.body.code === 0) {
+                                _self.istio_config = resp.body.data
                             }else{
                                 this.$message({
                                     message: resp.body.msg,

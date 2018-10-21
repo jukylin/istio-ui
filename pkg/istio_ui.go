@@ -6,6 +6,7 @@ import (
 	"os"
 	"errors"
 	"strings"
+	"io"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	//"istio.io/istio/pilot/pkg/kube/inject"
@@ -167,37 +168,58 @@ func CheckIstioConfigIsExists(filename, namespace  string) (bool, error) {
 	if err != nil{
 		return false, err
 	}
+
 	return CheckIsExists(istioConfigDir + "/" + filename)
 }
 
+
 func getIstioConfigDir(namespace string) (string, error) {
 	istioConfigDir := beego.AppConfig.String("istio_config_dir")
-	exists, err := CheckIsExists(istioConfigDir)
+	if istioConfigDir == ""{
+		return "", errors.New("istio_config_dir is empty")
+	}
+
+	return checkOrCreateDir(istioConfigDir, namespace)
+}
+
+
+func getBackUpIstioConfigDir(namespace string) (string, error) {
+	istioBackUpDir := beego.AppConfig.String("back_up_dir")
+	if istioBackUpDir == ""{
+		return "", errors.New("istio_back_up_dir is empty")
+	}
+
+	return checkOrCreateDir(istioBackUpDir, namespace)
+}
+
+func checkOrCreateDir(dirName, namespace string) (string, error) {
+	exists, err := CheckIsExists(dirName)
 	if err != nil{
 		return "", err
 	}
 
 	if !exists {
-		return "", errors.New("istio_config_dir not exists")
+		return "", errors.New(dirName + " not exists")
 	}
 
 	if namespace != "" {
-		istioConfigDir = istioConfigDir + "/" + namespace
-		exists, err = CheckIsExists(istioConfigDir)
+		dirName = dirName + "/" + namespace
+		exists, err = CheckIsExists(dirName)
 		if err != nil {
 			return "", err
 		}
 
 		if !exists {
-			err = os.Mkdir(istioConfigDir, os.ModePerm)
+			err = os.Mkdir(dirName, os.ModePerm)
 			if err != nil {
 				return "", err
 			}
 		}
 	}
 
-	return istioConfigDir, nil
+	return dirName, nil
 }
+
 
 /**
 write to local file
@@ -207,6 +229,8 @@ func WriteIstioConfig(data []byte, filename, namespace  string) error {
 	if err != nil{
 		return err
 	}
+
+	BackUp(filename, namespace)
 
 	err = ioutil.WriteFile(istioConfigDir + "/" + filename, []byte(data), 0644)
 	if err != nil{
@@ -223,12 +247,85 @@ func DelLocalIstioConfig(filename, namespace  string) error {
 		return err
 	}
 
+	BackUp(filename, namespace)
+
 	err = os.Remove(istioConfigDir + "/" + filename)
 	if err != nil{
 		return err
 	}
 
 	return nil
+}
+
+//copy filename.yaml to backup/filename.yaml
+func BackUp(filename, namespace  string) error {
+
+	back_up, err := beego.AppConfig.Bool("back_up")
+	if err != nil{
+		beego.Warn(err.Error())
+		back_up = false
+	}
+
+	if back_up == false{
+		beego.Info("istio config not backing up")
+		return nil
+	}
+
+	exists, err := CheckIstioConfigIsExists(filename, namespace)
+	if err != nil{
+		beego.Warn(err.Error())
+	}
+
+	if exists {
+		beego.Info(namespace + "'s " + filename + " istio config exists，"+ "prepare for backup")
+		//内容是否相同
+
+		istioConfigDir, err := getIstioConfigDir(namespace)
+		if err != nil{
+			beego.Warn(err.Error())
+			return err
+		}
+
+		srcFile ,err := os.Open(istioConfigDir + "/" + filename)
+		if err != nil{
+			beego.Warn(err.Error())
+			return err
+		}
+		defer srcFile.Close()
+
+		istioBackUpDir, err := getBackUpIstioConfigDir(namespace)
+		if err != nil{
+			beego.Warn(err.Error())
+			return nil
+		}
+
+		destFile,err := os.OpenFile(istioBackUpDir  + "/" + filename, os.O_WRONLY|os.O_CREATE,0644)
+		if err != nil{
+			beego.Warn(err.Error())
+			return err
+		}
+		defer destFile.Close()
+		_, err = io.Copy(destFile,srcFile)
+		if err != nil{
+			beego.Error(namespace + "'s " + filename + " backup error：", err.Error())
+		}else{
+			beego.Info(namespace + "'s " + filename + " backup completed")
+		}
+		return err
+	}else{
+		beego.Warn(namespace + "'s " + filename + " istio config not exists，"+ " not backing up")
+		return nil
+	}
+}
+
+//check istio config' backup exists
+func CheckBackUpIsExists(filename, namespace  string) (bool, error) {
+	istioBackUpDir, err := getBackUpIstioConfigDir(namespace)
+	if err != nil{
+		return false, nil
+	}
+
+	return CheckIsExists(istioBackUpDir + "/" + filename)
 }
 
 
@@ -269,6 +366,24 @@ func GetIstioConfig(filename, namespace string)([]byte, error){
 	}
 
 	data, err := ioutil.ReadFile(istioConfigDir + "/" + filename)
+	if err != nil{
+		return nil, err
+	}
+
+	return data, nil
+}
+
+
+/**
+get istio config from local file
+ */
+func GetBackedUpIstioConfig(filename, namespace string)([]byte, error){
+	backUpDir, err := getBackUpIstioConfigDir(namespace)
+	if err != nil{
+		return nil, err
+	}
+
+	data, err := ioutil.ReadFile(backUpDir + "/" + filename)
 	if err != nil{
 		return nil, err
 	}

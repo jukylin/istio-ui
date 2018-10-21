@@ -22,7 +22,8 @@ define(function (require,exports,module) {
                         pageSize: 10,
                         total: 0
                     },
-                    namespace_options: []
+                    namespace_options: [],
+                    backedup:false
                 }
             },
             mounted : function () {
@@ -57,6 +58,21 @@ define(function (require,exports,module) {
                     _self.handle_name = row.name;
                     _self.handle_namespace = row.namespace;
                     this.$http.get('/istio_config/get?name='+ _self.handle_name + '&namespace=' + _self.handle_namespace)
+                        .then(function (resp) {
+                            if (resp.body.code === 0) {
+                                _self.istio_config = resp.body.data.data
+                                _self.backedup = resp.body.data.backedup
+                            }else{
+                                this.$message({
+                                    message: resp.body.msg,
+                                    type: 'error'
+                                });
+                            }
+                        });
+                },
+                getBackUp: function () {
+                    var _self = this;
+                    this.$http.get('/istio_config/getbackup?name='+ _self.handle_name + '&namespace=' + _self.handle_namespace)
                         .then(function (resp) {
                             if (resp.body.code === 0) {
                                 _self.istio_config = resp.body.data
