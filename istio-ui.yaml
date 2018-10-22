@@ -41,6 +41,8 @@ spec:
           name: istio-config
         - mountPath: /data/www/istio_upload
           name: istio-upload
+        - mountPath: /data/www/istio_back_up
+          name: istio-back-up
       volumes:
       - name: istio-config
         hostPath:
@@ -48,6 +50,9 @@ spec:
       - name: istio-upload
         hostPath:
           path: /data/www/istio_upload
+      - name: istio-back-up
+        hostPath:
+          path: /data/www/istio_back_up
 ---
 apiVersion: v1
 kind: ServiceAccount
