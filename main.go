@@ -19,7 +19,7 @@ func main() {
 	pkg.InitDeployIndexStore()
 	models.InitController()
 	models.Run(stop)
-
+	
 	beego.Run()
 	close(stop)
 }

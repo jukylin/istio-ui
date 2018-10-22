@@ -18,8 +18,8 @@
             <el-form-item>
                 <el-button type="primary" size="small" @click="saveIstioConfig()">保存</el-button>
                 <el-button size="small" @click="delIstioConfig()">清空</el-button>
-                <el-button type="primary" size="small" v-if="backedup == true" @click="getBackUp()">恢复</el-button>
-                <el-button type="primary" size="small" v-else disabled>恢复</el-button>
+                <el-button type="primary" size="small" v-if="backedup == true" @click="getBackUp()">使用备份</el-button>
+                <el-button type="primary" size="small" v-else disabled>使用备份</el-button>
             </el-form-item>
         </el-form>
     </el-main>

@@ -72,6 +72,7 @@ define(function (require,exports,module) {
                 },
                 getBackUp: function () {
                     var _self = this;
+                    _self.backedup = false;
                     this.$http.get('/istio_config/getbackup?name='+ _self.handle_name + '&namespace=' + _self.handle_namespace)
                         .then(function (resp) {
                             if (resp.body.code === 0) {

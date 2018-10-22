@@ -19,6 +19,7 @@ import (
 	"github.com/astaxie/beego"
 	istiomodel "istio.io/istio/pilot/pkg/model"
 	corev1 "k8s.io/api/core/v1"
+	"bytes"
 )
 
 var DeployStore DeployIndexStore
@@ -230,7 +231,7 @@ func WriteIstioConfig(data []byte, filename, namespace  string) error {
 		return err
 	}
 
-	BackUp(filename, namespace)
+	BackUp(filename, namespace, data)
 
 	err = ioutil.WriteFile(istioConfigDir + "/" + filename, []byte(data), 0644)
 	if err != nil{
@@ -247,7 +248,7 @@ func DelLocalIstioConfig(filename, namespace  string) error {
 		return err
 	}
 
-	BackUp(filename, namespace)
+	BackUp(filename, namespace, nil)
 
 	err = os.Remove(istioConfigDir + "/" + filename)
 	if err != nil{
@@ -258,7 +259,7 @@ func DelLocalIstioConfig(filename, namespace  string) error {
 }
 
 //copy filename.yaml to backup/filename.yaml
-func BackUp(filename, namespace  string) error {
+func BackUp(filename, namespace  string, newIstioConfig []byte) error {
 
 	back_up, err := beego.AppConfig.Bool("back_up")
 	if err != nil{
@@ -278,12 +279,22 @@ func BackUp(filename, namespace  string) error {
 
 	if exists {
 		beego.Info(namespace + "'s " + filename + " istio config exists，"+ "prepare for backup")
-		//内容是否相同
 
 		istioConfigDir, err := getIstioConfigDir(namespace)
 		if err != nil{
 			beego.Warn(err.Error())
 			return err
+		}
+
+		oldIstioConfig, err := GetIstioConfig(filename, namespace)
+		if err != nil{
+			beego.Warn(err.Error())
+			return err
+		}
+
+		if compareIstioConfig(oldIstioConfig, newIstioConfig){
+			beego.Warn("istio config is equal, stop backup")
+			return nil
 		}
 
 		srcFile ,err := os.Open(istioConfigDir + "/" + filename)
@@ -317,6 +328,16 @@ func BackUp(filename, namespace  string) error {
 		return nil
 	}
 }
+
+
+func compareIstioConfig(old, new []byte) bool {
+	if bytes.Equal(old, new) {
+		return true
+	}else{
+		return false
+	}
+}
+
 
 //check istio config' backup exists
 func CheckBackUpIsExists(filename, namespace  string) (bool, error) {
