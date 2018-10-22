@@ -39,7 +39,7 @@
 
 * FILTER_NAME  不进行注入的name，默认：redis,mysql,istio-ui
 
-* BACK_UP  是否备份，默认：true
+* BACK_UP  备份上一份配置文件，默认：true
 
 * BACK_UP_DIR  备份地址，默认：/data/www/istio_back_up
 
