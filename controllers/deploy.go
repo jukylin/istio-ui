@@ -68,10 +68,10 @@ func (c *DeployController) List() {
 
 		total = pkg.DeployStore.Len(namespace)
 
-		start := (page - 1) * 10
-		end := pagesize
+		start := (page - 1) * pagesize
+		end := start + pagesize
 
-		if total < start+end {
+		if total < end {
 			end = 0
 		}
 
